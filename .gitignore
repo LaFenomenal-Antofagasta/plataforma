@@ -1,0 +1,5 @@
+.DS_Store
+# 2-nov-2026: el repo es público; los datos van al bucket privado de Supabase (scripts/subir_privado.py)
+*.csv
+*.json
+supabase/

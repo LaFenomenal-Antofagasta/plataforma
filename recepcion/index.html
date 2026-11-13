@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Recepción de facturas · La Fenomenal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Libre+Franklin:wght@400;500;600&display=swap">
+<!-- Fuente: _datos/github_La Fenomenal/recepcion/index.html (no se regenera; se edita aquí). Datos: Supabase La Fenomenal, tabla documentos
+     (lo carga /recepcion; gastos_fila/gastos_categoria los escribe _datos/scripts/recepcion_a_gastos.py). -->
+<style>
+:root {
+  --navy: #0D338E; --navy-deep: #092566; --cream: #F4F6FA; --panel: #FFFFFF; --ink: #1b212e; --muted: #686f80;
+  --rule: #D6DCE8; --ok: #1f7a4a; --ok-bg: #e3f1e8; --warn: #9a5b00; --warn-bg: #fbeed6; --bad: #a12a2a; --bad-bg: #f8e1e1;
+  --band-fg: #F4F6FA; --display: 'EB Garamond', Georgia, serif; --body: 'Libre Franklin', system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --navy: #9cb6f2; --navy-deep: #0a1d4d; --cream: #131722; --panel: #1b212e; --ink: #ebeef5; --muted: #a1a8b8;
+  --rule: #32394a; --ok: #6fd39c; --ok-bg: #173826; --warn: #f0b95c; --warn-bg: #3a2b12; --bad: #f08a8a; --bad-bg: #3a1717;
+  --band-fg: #ebeef5; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --navy: #9cb6f2; --navy-deep: #0a1d4d; --cream: #131722; --panel: #1b212e; --ink: #ebeef5; --muted: #a1a8b8;
+  --rule: #32394a; --ok: #6fd39c; --ok-bg: #173826; --warn: #f0b95c; --warn-bg: #3a2b12; --bad: #f08a8a; --bad-bg: #3a1717;
+  --band-fg: #ebeef5; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--body); font-size: 15px; }
+.band { background: var(--navy-deep); color: var(--band-fg); position: sticky; top: 0; z-index: 5; }
+.band .in { max-width: 1400px; margin: 0 auto; padding: 14px 16px; display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.brand { font-family: var(--display); font-weight: 600; font-size: 1.45rem; margin: 0; }
+.brand small { font-family: var(--body); font-weight: 400; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin-left: .5rem; }
+.band a { color: var(--band-fg); opacity: .75; text-decoration: none; margin-left: auto; font-size: .9rem; }
+main { max-width: 1400px; margin: 0 auto; padding: 18px 16px 48px; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 1.6rem; margin: 0; }
+.sub { color: var(--muted); margin: 4px 0 16px; max-width: 70ch; line-height: 1.45; }
+.kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.kpi { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; }
+.kpi b { display: block; font-size: 1.35rem; font-variant-numeric: tabular-nums; }
+.kpi span { color: var(--muted); font-size: .8rem; }
+.filtros { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.filtros input, .filtros select, button { font: inherit; color: var(--ink); background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; min-height: 40px; }
+.filtros input { flex: 1 1 220px; }
+button { cursor: pointer; font-weight: 600; }
+button.prim { background: var(--navy-deep); color: var(--band-fg); border-color: var(--navy-deep); }
+.tabla { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 1150px; font-size: .86rem; }
+th { text-align: left; font-size: .7rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 10px 8px; border-bottom: 1px solid var(--rule); position: sticky; top: 0; background: var(--panel); white-space: nowrap; }
+td { padding: 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+td.n { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.det { max-width: 360px; color: var(--muted); }
+tr.doc { cursor: pointer; }
+tr.doc:hover td { background: color-mix(in srgb, var(--navy) 6%, transparent); }
+tr.lineas td { background: var(--cream); padding: 6px 8px 12px 28px; }
+tr.lineas table { min-width: 0; font-size: .8rem; }
+tr.lineas th { position: static; background: transparent; }
+.pill { display: inline-block; font-size: .74rem; font-weight: 600; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+.ok { color: var(--ok); background: var(--ok-bg); } .warn { color: var(--warn); background: var(--warn-bg); } .bad { color: var(--bad); background: var(--bad-bg); }
+.vacio { padding: 28px; text-align: center; color: var(--muted); }
+#aviso { margin-left: 8px; color: var(--ok); font-weight: 600; }
+</style></head>
+<body data-seccion="recepcion">
+<main>
+  <h2>Facturas recibidas</h2>
+  <p class="sub">Lo que se leyó con <b>/recepcion</b> desde las fotos que suben los cajeros, en el mismo orden de columnas que la hoja GASTOS de Ventas y Gastos. Toca una fila para ver el detalle de productos. «Copiar para GASTOS» copia las filas filtradas para pegarlas en Excel.</p>
+  <section class="kpis" id="kpis"></section>
+  <div class="filtros">
+    <input id="q" type="search" placeholder="Buscar proveedor, N° documento o producto" aria-label="Buscar">
+    <select id="mes" aria-label="Mes"><option value="">Todos los meses</option></select>
+    <select id="estado" aria-label="Estado en plataforma"><option value="">Confirmados y borradores</option><option value="confirmado">Confirmados</option><option value="borrador">Borradores</option></select>
+    <select id="gastos" aria-label="En Ventas y Gastos"><option value="">En GASTOS: todos</option><option value="si">Ya en GASTOS</option><option value="no">Falta en GASTOS</option><option value="dif">Con diferencia</option></select>
+    <button class="prim" id="copiar">Copiar para GASTOS</button><button id="csv">Descargar CSV</button><span id="aviso" role="status"></span>
+  </div>
+  <div class="tabla"><table>
+    <thead><tr><th>Fecha doc.</th><th>Vencimiento</th><th>Categoría</th><th>Detalle / descripción</th><th>Proveedor</th><th>N° documento</th><th>Tipo</th><th>Monto</th><th>Condición</th><th>Plataforma</th><th>En GASTOS</th></tr></thead>
+    <tbody id="filas"><tr><td colspan="11" class="vacio">Cargando…</td></tr></tbody>
+  </table></div>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../marca.js"></script>
+<script src="../acceso.js"></script>
+<script src="../shell.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const peso = n => n == null ? '' : '$' + Math.round(n).toLocaleString('es-CL');
+const fecha = s => s ? s.slice(8, 10) + '-' + s.slice(5, 7) + '-' + s.slice(0, 4) : '';
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const MESES = ['enero','febrero','marzo','abril','mayo','junio','julio','agosto','septiembre','octubre','noviembre','diciembre'];
+let DOCS = [], abiertos = new Set();
+
+function fila(d) {  // misma lógica que recepcion_a_gastos.py
+  const venc = d.fecha_venc || d.fecha_doc;
+  const lineas = (d.documento_lineas || []).sort((a, b) => a.n - b.n);
+  return { A: d.fecha_doc, B: venc, C: d.gastos_categoria || '', E: d.proveedores?.nombre || d.proveedor_texto || '',
+    D: lineas.filter(l => !/^FLETE/i.test(l.descripcion_origen)).map(l => l.descripcion_origen).join(', ').slice(0, 150),
+    F: String(d.folio || '').replace(/^0+/, ''), G: d.tipo || 'FACTURA', H: d.total,
+    I: venc && d.fecha_doc && venc > d.fecha_doc ? 'CREDITO' : 'CONTADO', lineas };
+}
+function enGastos(d) { return !d.gastos_fila ? 'no' : d.gastos_fila.startsWith('diferencia') ? 'dif' : 'si'; }
+
+function filtrados() {
+  const q = $('q').value.trim().toUpperCase(), mes = $('mes').value, est = $('estado').value, g = $('gastos').value;
+  return DOCS.filter(d => (!mes || (d.fecha_doc || '').slice(0, 7) === mes) && (!est || d.estado === est) && (!g || enGastos(d) === g)
+    && (!q || (d.f.E + ' ' + d.f.F + ' ' + d.f.lineas.map(l => l.descripcion_origen).join(' ')).toUpperCase().includes(q)));
+}
+
+function pintar() {
+  const lista = filtrados();
+  const sum = k => lista.reduce((a, d) => a + (d[k] || 0), 0);
+  $('kpis').innerHTML = [
+    [lista.length, 'documentos'], [peso(sum('neto')), 'neto'], [peso(sum('iva')), 'IVA'], [peso(sum('total')), 'total'],
+    [lista.filter(d => d.estado === 'borrador').length, 'borradores por revisar'],
+    [lista.filter(d => enGastos(d) !== 'si').length, 'sin cuadrar con GASTOS']
+  ].map(([v, t]) => `<div class="kpi"><b>${v}</b><span>${t}</span></div>`).join('');
+  if (!lista.length) { $('filas').innerHTML = '<tr><td colspan="11" class="vacio">No hay documentos con esos filtros.</td></tr>'; return; }
+  $('filas').innerHTML = lista.map(d => {
+    const f = d.f, g = enGastos(d);
+    const gtxt = g === 'si' ? `<span class="pill ok">${esc(d.gastos_fila)}</span>` : g === 'dif' ? `<span class="pill warn">${esc(d.gastos_fila)}</span>` : '<span class="pill bad">falta</span>';
+    let h = `<tr class="doc" data-id="${d.id}" tabindex="0" aria-expanded="${abiertos.has(d.id)}"><td>${fecha(f.A)}</td><td>${fecha(f.B)}</td><td>${esc(f.C) || '<span class="pill warn">por definir</span>'}</td>
+      <td class="det">${esc(f.D)}</td><td>${esc(f.E)}</td><td>${esc(f.F)}</td><td>${esc(f.G)}</td><td class="n">${peso(f.H)}</td><td>${f.I}</td>
+      <td><span class="pill ${d.estado === 'confirmado' ? 'ok' : 'warn'}">${d.estado}</span></td><td>${gtxt}</td></tr>`;
+    if (abiertos.has(d.id)) h += `<tr class="lineas"><td colspan="11">
+      <p style="margin:4px 0 8px;color:var(--muted)">Neto ${peso(d.neto)} · IVA ${peso(d.iva)}${d.otros_impuestos ? ' · otros impuestos ' + peso(d.otros_impuestos) : ''} · ${esc(d.condicion || '')}${d.nota ? ' · ' + esc(d.nota) : ''}</p>
+      <table><thead><tr><th>Producto en la factura</th><th>Insumo</th><th>Cantidad</th><th>Unidad</th><th>Precio unit. neto</th><th>Total neto</th></tr></thead><tbody>
+      ${f.lineas.map(l => `<tr><td>${esc(l.descripcion_origen)}</td><td>${l.insumo_cod ? esc(l.insumo_cod + ' ' + (l.insumos?.nombre || '')) : '—'}</td>
+        <td class="n">${l.cantidad ?? ''}</td><td>${esc(l.unidad || '')}</td><td class="n">${peso(l.precio_unitario)}</td><td class="n">${peso(l.total_linea)}</td></tr>`).join('')}
+      </tbody></table></td></tr>`;
+    return h;
+  }).join('');
+}
+
+function tsv(lista, sep) {
+  const q = v => sep === ',' ? '"' + String(v ?? '').replace(/"/g, '""') + '"' : String(v ?? '').replace(/[\t\n]/g, ' ');
+  return lista.map(d => { const f = d.f;
+    return [fecha(f.A), fecha(f.B), f.C, f.D, f.E, f.F, f.G, f.H, f.I, 'PENDIENTE', '', '', 'Desde /recepcion - confirmar pago'].map(q).join(sep); }).join('\n');
+}
+
+$('filas').addEventListener('click', e => { const tr = e.target.closest('tr.doc'); if (!tr) return;
+  abiertos.has(tr.dataset.id) ? abiertos.delete(tr.dataset.id) : abiertos.add(tr.dataset.id); pintar(); });
+$('filas').addEventListener('keydown', e => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('tr.doc')) { e.preventDefault(); e.target.click(); } });
+['q', 'mes', 'estado', 'gastos'].forEach(id => $(id).addEventListener('input', pintar));
+$('copiar').addEventListener('click', async () => {
+  const lista = filtrados();
+  try { await navigator.clipboard.writeText(tsv(lista, '\t')); $('aviso').textContent = `${lista.length} filas copiadas: pégalas en la primera fila vacía de GASTOS (columna A).`; }
+  catch { $('aviso').textContent = 'No se pudo copiar; usa «Descargar CSV».'; }
+});
+$('csv').addEventListener('click', () => {
+  const cab = ['FECHA DEL DOCUMENTO','FECHA DE VENCIMIENTO','CATEGORIA','DETALLE / DESCRIPCION','PROVEEDOR/RAZON SOCIAL','N° DOCUMENTO','TIPO DOCUMENTO','MONTO','CONDICION','ESTADO DE PAGO','FECHA DE PAGO','VENCIMIENTO','COMENTARIOS'];
+  const blob = new Blob(['﻿' + cab.join(',') + '\n' + tsv(filtrados(), ',')], {type: 'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'recepcion_gastos.csv'; a.click();
+});
+
+(async () => {
+  try {
+    const db = await acceso.cliente();  // 2-nov-2026: solo con sesión
+    await acceso.soloAdmin();  // 4-nov-2026: cocina no ve facturas
+    const { data, error } = await db.from('documentos')
+      .select('id, estado, tipo, folio, proveedor_texto, fecha_doc, fecha_venc, condicion, neto, iva, otros_impuestos, total, nota, gastos_fila, gastos_categoria, proveedores(nombre), documento_lineas(n, descripcion_origen, insumo_cod, cantidad, unidad, precio_unitario, total_linea, insumos(nombre))')
+      .neq('estado', 'anulado').order('fecha_doc', { ascending: false });
+    if (error) throw error;
+    DOCS = data.map(d => ({ ...d, f: fila(d) }));
+    [...new Set(DOCS.map(d => (d.fecha_doc || '').slice(0, 7)).filter(Boolean))].sort().reverse()
+      .forEach(m => $('mes').insertAdjacentHTML('beforeend', `<option value="${m}">${MESES[+m.slice(5) - 1]} ${m.slice(0, 4)}</option>`));
+    pintar();
+  } catch (e) {
+    $('filas').innerHTML = `<tr><td colspan="11" class="vacio">No se pudieron leer los datos (${esc(e.message || e)}).</td></tr>`;
+  }
+})();
+</script>
+</body></html>

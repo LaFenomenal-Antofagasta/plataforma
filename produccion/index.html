@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex">
+<title>Producción · La Fenomenal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Libre+Franklin:wght@400;500;600&display=swap">
+<!-- Fuente: _cerebro/datos/scripts/web_produccion_lf.html (la copia armar_web_lf.py a plataforma_web/produccion/). No editar la copia.
+     Datos: Supabase lafenomenal, tablas produccion_plan (plan por día, lo genera plan_produccion_lf.py) y produccion_dia (lo hecho y lo digitado).
+     Flujo: cocina marca lo armado y su cantidad -> queda "falta digitar en Restô" -> la cajera lo digita en Restô y lo marca (solo acceso administración). -->
+<style>
+:root {
+  --navy: #0D338E; --navy-deep: #092566; --cream: #F4F6FA; --panel: #FFFFFF; --ink: #1b212e; --muted: #686f80; --rule: #D6DCE8;
+  --ok: #1f7a4a; --ok-bg: #e3f1e8; --warn: #9a5b00; --warn-bg: #fbeed6; --gold: #CC9200;
+  --band-fg: #F4F6FA; --display: 'EB Garamond', Georgia, serif; --body: 'Libre Franklin', system-ui, sans-serif; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --navy: #9cb6f2; --navy-deep: #0a1d4d; --cream: #131722; --panel: #1b212e; --ink: #ebeef5; --muted: #a1a8b8; --rule: #32394a;
+  --ok: #6fd39c; --ok-bg: #173826; --warn: #f0b95c; --warn-bg: #3a2b12; --band-fg: #ebeef5; color-scheme: dark; } }
+:root[data-theme="dark"] { --navy: #9cb6f2; --navy-deep: #0a1d4d; --cream: #131722; --panel: #1b212e; --ink: #ebeef5; --muted: #a1a8b8; --rule: #32394a;
+  --ok: #6fd39c; --ok-bg: #173826; --warn: #f0b95c; --warn-bg: #3a2b12; --band-fg: #ebeef5; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--cream); color: var(--ink); font-family: var(--body); font-size: 15px; }
+.band { background: var(--navy-deep); color: var(--band-fg); }
+.band-in { max-width: 900px; margin: 0 auto; padding: 14px 16px 10px; }
+.brand { font-family: var(--display); font-weight: 600; font-size: 1.6rem; margin: 0; }
+.fechabox { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+.fechabox button { background: transparent; color: var(--band-fg); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; min-height: 40px; padding: 0 14px; font: inherit; cursor: pointer; }
+.fechabox .dianom { font-family: var(--display); font-size: 1.25rem; min-width: 12ch; text-align: center; }
+.tabs { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0 2px; }
+.tabs button { flex: none; background: transparent; color: var(--band-fg); border: 1px solid rgba(255,255,255,.35); border-radius: 999px; min-height: 40px; padding: 0 14px; font: inherit; cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--band-fg); color: var(--navy-deep); font-weight: 600; }
+.tabs .cnt { display: inline-block; margin-left: 6px; background: var(--gold); color: #1d2128; border-radius: 999px; padding: 0 7px; font-size: .8rem; font-weight: 600; }
+main { max-width: 900px; margin: 0 auto; padding: 14px 16px 90px; }
+.sub { color: var(--muted); margin: 4px 0 12px; line-height: 1.45; }
+.quien { display: flex; gap: 8px; align-items: center; margin: 4px 0 12px; flex-wrap: wrap; }
+.quien input { font: inherit; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); color: var(--ink); min-height: 40px; }
+.barra { display: flex; gap: 10px; flex-wrap: wrap; margin: 0 0 12px; }
+.barra span { background: var(--panel); border: 1px solid var(--rule); border-radius: 999px; padding: 6px 12px; font-size: .9rem; }
+.row { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; }
+.row.hecho { border-left: 5px solid var(--warn); }
+.row.dig { border-left: 5px solid var(--ok); }
+.row .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+.row .nom { font-weight: 600; }
+.row .plan { color: var(--muted); font-size: .9rem; }
+.row .ctl { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
+.row input[type=number], .row input[type=text] { font: inherit; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); color: var(--ink); min-height: 44px; width: 110px; }
+.row input[type=text] { width: 150px; }
+button.p, button.s { font: inherit; font-weight: 600; min-height: 44px; padding: 0 16px; border-radius: 8px; cursor: pointer; border: 1px solid var(--navy); }
+button.p { background: var(--navy); color: #fff; }
+:root[data-theme="dark"] button.p { color: #131722; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.p { color: #131722; } }
+button.s { background: transparent; color: var(--navy); }
+.chip { display: inline-block; border-radius: 999px; padding: 3px 10px; font-size: .8rem; font-weight: 600; }
+.chip.w { background: var(--warn-bg); color: var(--warn); }
+.chip.o { background: var(--ok-bg); color: var(--ok); }
+.chip.g { background: var(--rule); color: var(--muted); }
+.meta { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+h3 { font-family: var(--display); font-size: 1.25rem; margin: 18px 0 8px; }
+.notice { border: 1px dashed var(--rule); border-radius: 12px; padding: 16px; color: var(--muted); background: var(--panel); }
+details.extra { margin-top: 18px; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 10px 14px; }
+details.extra summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; }
+details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); min-height: 44px; max-width: 100%; }
+.toast { position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%); background: var(--navy-deep); color: var(--band-fg); padding: 10px 16px; border-radius: 10px; z-index: 50; }
+</style></head>
+<body data-seccion="produccion">
+<div class="band"><div class="band-in">
+  <h1 class="brand">Producción</h1>
+  <div class="fechabox">
+    <button id="ayer" aria-label="Día anterior">‹</button>
+    <span class="dianom" id="dianom" aria-live="polite"></span>
+    <button id="manana" aria-label="Día siguiente">›</button>
+    <button id="hoy">Hoy</button>
+  </div>
+  <nav class="tabs" id="tabs" aria-label="Estaciones"></nav>
+</div></div>
+<main id="main"><div class="notice">Cargando el plan de producción…</div></main>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../marca.js"></script>
+<script src="../acceso.js"></script>
+<script src="../shell.js"></script>
+<script>
+(function () {
+  const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const EST = { todas: 'Todas', bolleria: 'Bollería y pastelería', panaderia: 'Panadería', cocina: 'Cocina', barra: 'Barra' };
+  const $ = s => document.querySelector(s);
+  const main = $('#main');
+  const H = location.hash.slice(1);
+  const S = { fecha: hoyISO(), tab: ['bolleria', 'panaderia', 'cocina', 'barra', 'digitar'].includes(H) ? H : 'todas', plan: [], dia: {}, pend: [], extra: [], db: null, admin: false, err: null };
+
+  function hoyISO() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function shift(f, n) { const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+  function iso(f) { const g = new Date(f + 'T12:00:00').getDay(); return g === 0 ? 7 : g; }
+  function fmt(f) { const d = new Date(f + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1); }
+  function hora(t) { return t ? new Date(t).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : ''; }
+  function num(v) { return Number(v).toLocaleString('es-CL', { maximumFractionDigits: 1 }); }
+  const UNI = { und: 'un', kg: 'kg', lt: 'lt' };
+  const un = u => UNI[u] || u || '';
+  function el(tag, attrs, ...kids) { const e = document.createElement(tag); if (attrs) for (const k in attrs) { if (k === 'class') e.className = attrs[k]; else if (k === 'text') e.textContent = attrs[k]; else if (k.startsWith('on')) e.addEventListener(k.slice(2), attrs[k]); else e.setAttribute(k, attrs[k]); } kids.flat().forEach(c => c != null && e.append(c.nodeType ? c : document.createTextNode(c))); return e; }
+  function toast(m) { const t = $('#toast'); t.textContent = m; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3200); }
+  const getNombre = () => { try { return localStorage.getItem('lafenomenal_nombre') || ''; } catch (e) { return S.nm || ''; } };
+  const setNombre = n => { S.nm = n; try { localStorage.setItem('lafenomenal_nombre', n); } catch (e) {} };
+
+  async function cargar() {
+    try {
+      const [p, d, pe] = await Promise.all([
+        S.db.from('produccion_plan').select('*').eq('dia', iso(S.fecha)).order('nombre'),
+        S.db.from('produccion_dia').select('*').eq('fecha', S.fecha),
+        S.db.from('produccion_dia').select('*').not('hecho_cant', 'is', null).eq('digitado', false).order('fecha').order('nombre')]);
+      for (const r of [p, d, pe]) if (r.error) throw r.error;
+      S.plan = p.data; S.dia = {}; d.data.forEach(r => S.dia[r.cod] = r); S.pend = pe.data; S.err = null;
+      const t = await S.db.from('produccion_plan').select('cod,nombre,estacion,unidad').order('nombre');
+      const vistos = new Set(); S.extra = (t.data || []).filter(r => !vistos.has(r.cod) && vistos.add(r.cod));
+    } catch (e) { S.err = e.message || String(e); }
+    render();
+  }
+
+  async function marcarHecho(r, cant) {
+    const nm = getNombre(); if (!nm) { toast('Escribe tu nombre arriba antes de marcar.'); return; }
+    if (cant === null || (cant !== '' && Number(cant) >= 0)) {
+      const { error } = await S.db.rpc('produccion_hecho', { p_fecha: S.fecha, p_cod: r.cod, p_estacion: r.estacion, p_nombre: r.nombre, p_unidad: r.unidad, p_plan: r.cantidad ?? r.plan ?? null, p_cantidad: cant === null ? null : Number(cant), p_por: nm });
+      if (error) { toast('No se pudo guardar: ' + error.message); return; }
+      toast(cant === null ? 'Deshecho.' : 'Anotado: ' + r.nombre); await cargar();
+    } else toast('Escribe una cantidad.');
+  }
+  async function marcarDigitado(p, ok, nro) {
+    const nm = getNombre(); if (!nm) { toast('Escribe tu nombre arriba antes de marcar.'); return; }
+    const { error } = await S.db.rpc('produccion_digitado', { p_fecha: p.fecha, p_cod: p.cod, p_ok: ok, p_por: nm, p_nro: nro || '' });
+    if (error) { toast('No se pudo guardar: ' + error.message); return; }
+    toast(ok ? 'Digitado en Restô: ' + p.nombre : 'Desmarcado.'); await cargar();
+  }
+
+  function estadoChip(h) { return !h || h.hecho_cant == null ? el('span', { class: 'chip g', text: 'Pendiente' })
+    : h.digitado ? el('span', { class: 'chip o', text: 'Digitado en Restô ✓' }) : el('span', { class: 'chip w', text: 'Falta digitar en Restô' }); }
+
+  function fila(r) {
+    const h = S.dia[r.cod]; const hecho = h && h.hecho_cant != null;
+    const inp = el('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', value: hecho ? h.hecho_cant : (r.cantidad ?? ''), 'aria-label': 'Cantidad armada de ' + r.nombre });
+    const ctl = el('div', { class: 'ctl' }, inp, el('span', { class: 'plan', text: un(r.unidad) }),
+      el('button', { class: 'p', text: hecho ? 'Corregir' : 'Hecho', onclick: () => marcarHecho(r, inp.value) }),
+      hecho ? el('button', { class: 's', text: 'Deshacer', onclick: () => marcarHecho(r, null) }) : null);
+    return el('div', { class: 'row' + (hecho ? (h.digitado ? ' dig' : ' hecho') : '') },
+      el('div', { class: 'top' }, el('span', { class: 'nom', text: r.nombre }), estadoChip(h)),
+      el('div', { class: 'plan', text: r.cantidad != null ? `Plan: ${num(r.cantidad)} ${un(r.unidad)}${r.frecuencia && r.frecuencia !== 'diario' ? ' · ' + r.frecuencia : ''}` : 'Fuera del plan' }),
+      ctl,
+      hecho ? el('div', { class: 'meta', text: `Armado: ${num(h.hecho_cant)} ${un(h.unidad || r.unidad)} · ${h.hecho_por || ''} ${hora(h.hecho_en)}${h.digitado ? ` · Digitado por ${h.digitado_por || ''} ${hora(h.digitado_en)}${h.nro_resto ? ' (Restô ' + h.nro_resto + ')' : ''}` : ''}` }) : null);
+  }
+
+  function renderEstacion() {
+    const filas = S.plan.filter(r => S.tab === 'todas' || r.estacion === S.tab);
+    const enPlan = new Set(S.plan.map(r => r.cod));
+    const fuera = Object.values(S.dia).filter(h => !enPlan.has(h.cod) && (S.tab === 'todas' || h.estacion === S.tab)).map(h => ({ cod: h.cod, nombre: h.nombre, estacion: h.estacion, unidad: h.unidad, cantidad: null }));
+    const todas = [...filas, ...fuera];
+    const hechas = todas.filter(r => S.dia[r.cod] && S.dia[r.cod].hecho_cant != null);
+    const dig = hechas.filter(r => S.dia[r.cod].digitado);
+    main.append(el('p', { class: 'sub', text: `Lo que hay que armar el ${fmt(S.fecha).toLowerCase()}, según el consumo real de los últimos meses más 20%. Marca cada producto cuando esté armado y anota la cantidad real. La cajera lo digita después en Restô.` }));
+    main.append(el('div', { class: 'quien' }, el('label', { for: 'nm', text: 'Tu nombre: ' }), (() => { const i = el('input', { id: 'nm', type: 'text', value: getNombre(), placeholder: 'Escribe tu nombre', autocomplete: 'given-name' }); i.addEventListener('change', () => setNombre(i.value.trim())); return i; })()));
+    main.append(el('div', { class: 'barra' }, el('span', { text: `Armados: ${hechas.length} de ${todas.length}` }), el('span', { text: `Digitados en Restô: ${dig.length}` })));
+    if (!todas.length) { main.append(el('div', { class: 'notice', text: 'No hay producción programada para este día en esta estación.' })); }
+    else todas.forEach(r => main.append(fila(r)));
+    const sel = el('select', { 'aria-label': 'Producto armado fuera del plan' }, el('option', { value: '', text: 'Elige el producto…' }), S.extra.filter(r => S.tab === 'todas' || r.estacion === S.tab).map(r => el('option', { value: r.cod, text: r.nombre })));
+    const q = el('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', placeholder: 'Cantidad', 'aria-label': 'Cantidad' });
+    main.append(el('details', { class: 'extra' }, el('summary', { text: 'Armé algo que no está en el plan' }),
+      el('div', { class: 'ctl' }, sel, q, el('button', { class: 'p', text: 'Anotar', onclick: () => { const r = S.extra.find(x => x.cod === sel.value); if (!r) { toast('Elige un producto.'); return; } marcarHecho({ cod: r.cod, nombre: r.nombre, estacion: r.estacion, unidad: r.unidad, cantidad: null }, q.value); } }))));
+  }
+
+  function renderDigitar() {
+    main.append(el('p', { class: 'sub', text: 'Armados que cocina ya hizo y que todavía no están en Restô. Digítalos en Restô y marca cada uno. Los más antiguos primero.' }));
+    if (!S.admin) { main.append(el('div', { class: 'notice', text: 'Esta lista es para administración (la cajera). Entra con el usuario de administración para marcar lo digitado.' })); }
+    main.append(el('div', { class: 'quien' }, el('label', { for: 'nm', text: 'Tu nombre: ' }), (() => { const i = el('input', { id: 'nm', type: 'text', value: getNombre(), placeholder: 'Escribe tu nombre' }); i.addEventListener('change', () => setNombre(i.value.trim())); return i; })()));
+    if (!S.pend.length) { main.append(el('div', { class: 'notice', text: 'No hay armados pendientes de digitar. Todo lo que hizo cocina ya está en Restô.' })); return; }
+    const hoy = hoyISO(); const viejos = S.pend.filter(p => p.fecha < hoy).length;
+    main.append(el('div', { class: 'barra' }, el('span', { text: `Pendientes: ${S.pend.length}` }), viejos ? el('span', { text: `De días anteriores: ${viejos}` }) : null));
+    let f = null;
+    S.pend.forEach(p => {
+      if (p.fecha !== f) { f = p.fecha; main.append(el('h3', { text: fmt(f) + (f < hoy ? ' · atrasado' : '') })); }
+      const nro = el('input', { type: 'text', placeholder: 'N° armado Restô (opcional)', 'aria-label': 'Número de armado en Restô' });
+      main.append(el('div', { class: 'row hecho' },
+        el('div', { class: 'top' }, el('span', { class: 'nom', text: p.nombre }), el('span', { class: 'chip w', text: `${num(p.hecho_cant)} ${un(p.unidad)}` })),
+        el('div', { class: 'meta', text: `${EST[p.estacion] || p.estacion || ''} · armó ${p.hecho_por || ''} ${hora(p.hecho_en)}${p.plan != null ? ' · plan ' + num(p.plan) : ''}` }),
+        S.admin ? el('div', { class: 'ctl' }, nro, el('button', { class: 'p', text: 'Ya lo digité en Restô', onclick: () => marcarDigitado(p, true, nro.value) })) : null));
+    });
+  }
+
+  function render() {
+    $('#dianom').textContent = fmt(S.fecha) + (S.fecha === hoyISO() ? ' · hoy' : '');
+    const tabs = $('#tabs'); tabs.replaceChildren();
+    ['todas', 'bolleria', 'panaderia', 'cocina', 'barra'].forEach(t => tabs.append(el('button', { 'aria-pressed': String(S.tab === t), text: EST[t], onclick: () => { S.tab = t; render(); } })));
+    tabs.append(el('button', { 'aria-pressed': String(S.tab === 'digitar'), onclick: () => { S.tab = 'digitar'; render(); } }, 'Para digitar en Restô', S.pend.length ? el('span', { class: 'cnt', text: String(S.pend.length) }) : null));
+    main.replaceChildren();
+    if (S.err) { main.append(el('div', { class: 'notice', text: 'No se pudo leer la producción: ' + S.err + '. Recarga la página.' })); return; }
+    if (S.tab === 'digitar') renderDigitar(); else renderEstacion();
+  }
+
+  $('#ayer').onclick = () => { S.fecha = shift(S.fecha, -1); cargar(); };
+  $('#manana').onclick = () => { S.fecha = shift(S.fecha, 1); cargar(); };
+  $('#hoy').onclick = () => { S.fecha = hoyISO(); cargar(); };
+  (async () => { S.db = await acceso.cliente(); S.admin = await acceso.esAdmin(); await cargar(); setInterval(() => { if (!document.hidden && !document.querySelector('input:focus')) cargar(); }, 60000); })();
+})();
+</script>
+</body></html>

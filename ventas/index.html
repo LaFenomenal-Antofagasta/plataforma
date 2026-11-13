@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Ventas La Fenomenal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Libre+Franklin:wght@400;500;600&display=swap">
+<style>
+/* Tokens que en el Artifact entrega el sistema de diseño; aquí con la marca La Fenomenal (navy #0D338E, crema #F4F6FA) */
+:root {
+  --color-bg: #F4F6FA; --color-fg: #1b212e; --color-fg-muted: #686f80; --color-panel: #FFFFFF; --color-border-line: #D6DCE8;
+  --color-ok: #1f7a4a; --color-bad: #b3261e;
+  --font-anthropic-serif: 'EB Garamond', Georgia, serif; --font-anthropic-sans: 'Libre Franklin', system-ui, sans-serif;
+  --cds-gap-xs: 4px; --cds-gap-sm: 8px; --cds-gap-md: 16px; --cds-gap-xl: 28px;
+  --cds-pad-xs: 4px; --cds-pad-sm: 10px; --cds-pad-lg: 20px; --cds-radius: 10px;
+  --cds-font-size-caption: .8rem; --cds-font-size-heading: 1.15rem; --cds-font-size-title: 2rem; --cds-font-weight-medium: 600;
+  --cds-surface-popover: #ffffff; --cds-border: #D6DCE8; --cds-shadow-popover: 0 6px 20px rgb(0 0 0 / .12); --cds-text-secondary: #686f80;
+  --cds-chart-grid: #E1E6F0; --cds-chart-axis: #A9B3C7; --cds-dur-slow: .3s;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --color-bg: #131722; --color-fg: #ebeef5; --color-fg-muted: #a1a8b8; --color-panel: #1b212e; --color-border-line: #32394a;
+  --color-ok: #6fd39c; --color-bad: #f2867c; --cds-surface-popover: #232a3a; --cds-border: #32394a; --cds-text-secondary: #a1a8b8;
+  --cds-chart-grid: #2a3140; --cds-chart-axis: #485062; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --color-bg: #131722; --color-fg: #ebeef5; --color-fg-muted: #a1a8b8; --color-panel: #1b212e; --color-border-line: #32394a;
+  --color-ok: #6fd39c; --color-bad: #f2867c; --cds-surface-popover: #232a3a; --cds-border: #32394a; --cds-text-secondary: #a1a8b8;
+  --cds-chart-grid: #2a3140; --cds-chart-axis: #485062; color-scheme: dark; }
+body { margin: 0; background: var(--color-bg); color: var(--color-fg); font-family: var(--font-anthropic-sans); font-size: 15px; }
+.wrap { max-width: 72rem; margin: 0 auto; padding: 28px 16px 56px; }
+.dash-skeleton { color: transparent !important; background: var(--color-border-line); border-radius: 4px; }
+
+.ac { --ac-s1: #c4cce0; --ac-s2: #7f94c4; --ac-s3: #0D338E; --ac-up: var(--color-ok); --ac-down: var(--color-bad);
+  font-family: var(--font-anthropic-sans); display: grid; gap: var(--cds-gap-xl); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .ac { --ac-s1: #4a556e; --ac-s2: #7c93c8; --ac-s3: #b4caff; } }
+:root[data-theme="dark"] .ac { --ac-s1: #4a556e; --ac-s2: #7c93c8; --ac-s3: #b4caff; }
+.ac h1 { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); margin: 0; text-wrap: balance; }
+.ac h2 { font-size: var(--cds-font-size-heading); font-weight: var(--cds-font-weight-medium); margin: 0; }
+.ac .lede { color: var(--color-fg-muted); margin: var(--cds-gap-xs) 0 0; max-width: 70ch; }
+.ac .lede b, .ac .tile b { font-weight: 600; }
+.ac .note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption); margin: var(--cds-gap-xs) 0 0; }
+.ac .tiles { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr)); }
+.ac .card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); padding: var(--cds-pad-lg); min-width: 0; }
+.ac .tile { display: grid; gap: var(--cds-gap-xs); position: relative; }
+.ac .tile .sw { width: .75rem; height: .75rem; border-radius: 3px; display: inline-block; margin-right: .4rem; vertical-align: -1px; }
+.ac .tile .lab { font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ac .tile .big { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: var(--cds-font-size-title); font-variant-numeric: tabular-nums; }
+.ac .tile .row { font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; display: flex; flex-wrap: wrap; gap: var(--cds-gap-sm); }
+.ac .up { color: var(--ac-up); } .ac .down { color: var(--ac-down); }
+.ac .grid2 { display: grid; gap: var(--cds-gap-md); grid-template-columns: repeat(auto-fit, minmax(min(100%, 24rem), 1fr)); }
+.ac .chart { position: relative; min-height: 280px; margin-top: var(--cds-gap-md); }
+.ac .legend { display: flex; gap: var(--cds-gap-md); flex-wrap: wrap; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); margin-top: var(--cds-gap-sm); }
+.ac .legend span::before { content: ""; display: inline-block; width: .7rem; height: .7rem; border-radius: 3px; margin-right: .35rem; vertical-align: -1px; background: var(--c); }
+.ac .tip { position: absolute; pointer-events: none; background: var(--cds-surface-popover); border: 1px solid var(--cds-border); border-radius: var(--cds-radius);
+  box-shadow: var(--cds-shadow-popover); padding: var(--cds-pad-xs) var(--cds-pad-sm); font-size: var(--cds-font-size-caption); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ac .tip .h { color: var(--cds-text-secondary); }
+.ac .scroll { max-height: 30rem; overflow: auto; margin-top: var(--cds-gap-md); }
+.ac table { width: 100%; border-collapse: collapse; font-size: var(--cds-font-size-caption); font-variant-numeric: tabular-nums; }
+.ac th, .ac td { padding: .4rem .5rem; text-align: right; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; }
+.ac th:first-child, .ac td:first-child, .ac .tl { text-align: left; }
+.ac td:first-child { white-space: normal; min-width: 9rem; }
+.ac th { position: sticky; top: 0; background: var(--color-panel); font-weight: var(--cds-font-weight-medium); z-index: 1; }
+.ac th button { all: unset; cursor: pointer; }
+.ac th button:focus-visible { outline: 2px solid var(--ac-s3); outline-offset: 2px; }
+.ac .bar { display: inline-block; height: .55rem; border-radius: 3px; background: var(--ac-s3); vertical-align: middle; margin-left: .4rem; }
+.ac .search { width: 100%; max-width: 20rem; padding: .45rem .6rem; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); background: var(--color-bg); color: var(--color-fg); font: inherit; margin-top: var(--cds-gap-sm); }
+.ac .rk-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--cds-gap-sm); }
+.ac .seg { display: inline-flex; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius); overflow: hidden; }
+.ac .seg button { all: unset; cursor: pointer; padding: .35rem .8rem; font-size: var(--cds-font-size-caption); color: var(--color-fg-muted); }
+.ac .seg button[aria-selected="true"] { background: var(--ac-s3); color: var(--color-bg); }
+.ac .seg button:focus-visible { outline: 2px solid var(--ac-s3); outline-offset: -2px; }
+.ac .ctrls { display: flex; flex-wrap: wrap; gap: var(--cds-gap-md); align-items: end; }
+.ac .ctrls > div { min-width: 0; flex: 1 1 14rem; max-width: 20rem; }
+.ac .daysum { margin: var(--cds-gap-sm) 0 0; font-variant-numeric: tabular-nums; }
+.ac .daysum b { font-weight: 600; }
+.ac .hide-n { } @media (max-width: 560px) { .ac .hide-n { display: none; } }
+.ac [data-dash-source-state=empty] { color: transparent; }
+.ac [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow); }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../marca.js"></script>
+<script src="../acceso.js"></script>
+<script>
+// Reemplazo mínimo del runtime `dash` del Artifact: carga los CSV del bucket privado (con sesión) y resuelve los cálculos.
+window.dash = (() => {
+  const raw = {}, calcs = {}, cbs = []; let st = 'loading';
+  const run = () => cbs.forEach(f => f());
+  return {
+    calc(n, o) { calcs[n] = o; },
+    data(n) {
+      if (st !== 'ok') return { status: st };
+      if (n in raw) return { status: 'ok', data: raw[n] };
+      const c = calcs[n]; if (!c) return { status: 'error' };
+      if (!c.v) c.v = c.fn(...c.inputs.map(i => raw[i]));
+      return { status: 'ok', data: c.v };
+    },
+    onData(f) { cbs.push(f); f(); },
+    async load(names) {
+      try { await Promise.all(names.map(async n => { raw[n] = d3.csvParse(await acceso.archivo('ventas/' + n + '.csv')); })); st = 'ok'; } catch (e) { st = 'error'; }
+      run(); let t; addEventListener('resize', () => { clearTimeout(t); t = setTimeout(run, 150); });
+    }
+  };
+})();
+</script>
+</head>
+<body data-seccion="ventas">
+<script src="../shell.js"></script>
+<div class="wrap">
+
+
+<div class="ac">
+  <header>
+    <h1 id="titulo">Ventas La Fenomenal · 3 semanas de octubre</h1>
+    <p class="lede" id="takeaway">La semana <span data-source="semanas" data-field="etiqueta" data-where="sem=S3" class="dash-skeleton">—</span> vendió
+      <b data-source="semanas" data-field="venta" data-where="sem=S3" class="dash-skeleton">—</b> neto, con
+      <b data-source="var_semanal" data-field="var_dia" data-where="sem=S3" class="dash-skeleton">—</b> de venta por día frente a la semana anterior.
+      Los platos de fondo nuevos (lomo, salmón, filete, escalopa) entraron esa semana y le quitaron venta a los sándwiches.</p>
+    <p class="note">Montos netos sin IVA, desde el ranking por fecha comercial del sistema. La semana 1 tiene 7 días (incluye el lunes 5); las otras, 6 (martes a domingo). Fuera de la comparación quedan el 28-sep (prueba) y el 27-oct (día en curso).</p>
+  </header>
+
+  <section class="card" id="cierres" aria-label="Cierres de caja" hidden>
+    <h2>Cierres de caja · venta diaria</h2>
+    <p class="note">Desde la foto del cierre de caja que sube el local (un cierre por turno). Total con IVA según el sistema; neto = total / 1,19. La diferencia es lo que contó el cajero menos lo que registró el sistema: debe ser $0.</p>
+    <div class="tiles" id="cierres-tiles" style="margin-top:var(--cds-gap-md)"></div>
+    <div class="scroll"><table id="cierres-tabla"><thead><tr>
+      <th>Día</th><th>Turnos</th><th>Efectivo</th><th>Débito</th><th>Propinas</th><th>Total c/IVA</th><th>Neto</th><th>Diferencia</th></tr></thead><tbody></tbody></table></div>
+  </section>
+
+  <section id="semanas" class="tiles" aria-label="Resumen por semana"></section>
+
+  <div class="grid2">
+    <section class="card" id="por-dia">
+      <h2>Venta por día de la semana</h2>
+      <p class="note">Viernes y sábado concentran la venta; el viernes 23 y el sábado 24 de octubre fueron los días más altos del mes.</p>
+      <div class="chart" id="chart-dia" data-source="venta_por_dia"></div>
+      <div class="legend" id="leg-dia" data-source="semanas"></div>
+    </section>
+
+    <section class="card" id="rubros">
+      <h2>Venta por rubro</h2>
+      <p class="note">Ordenado por la semana 3. La barra muestra su peso en la semana 3. Varios platos nuevos (salmón, medallón, escalopa, pizzas) todavía no tienen rubro en el sistema y caen en "SIN RUBRO".</p>
+      <div class="scroll">
+        <table id="tabla-rubros" data-source="venta_por_rubro" data-row-key="rubro">
+          <thead><tr>
+            <th data-field="rubro">Rubro</th>
+            <th data-field="S1" class="hide-n">Sem 1</th>
+            <th data-field="S2">Sem 2</th>
+            <th data-field="S3">Sem 3</th>
+            <th data-source="rubro_var" data-field="var">S3 vs S2</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <section class="card" id="productos">
+    <div class="rk-head">
+      <h2>Ranking de productos</h2>
+      <div class="seg" role="tablist" aria-label="Vista del ranking">
+        <button role="tab" id="vista-semana" aria-selected="true">Por semana</button>
+        <button role="tab" id="vista-dia" aria-selected="false">Por día</button>
+      </div>
+    </div>
+    <p class="note" id="nota-semana">Prom./día = unidades de la semana divididas por sus días abiertos (S1: 7, S2 y S3: 6). La variación compara unidades de la semana 3 contra la 2; "nuevo" = no se vendió en la semana 2. Toca un encabezado para ordenar.</p>
+    <p class="note" id="nota-dia" hidden>Ranking de la fecha elegida. Prom./día sem. = promedio diario del producto en la semana de esa fecha, para ver si el día estuvo sobre o bajo lo normal.</p>
+    <div class="ctrls">
+      <div><label for="buscar-prod" class="note">Buscar producto o rubro</label><br>
+        <input id="buscar-prod" class="search" type="search" placeholder="Ej: churrasco, cocteles"></div>
+      <div id="ctrl-fecha" hidden><label for="fecha-sel" class="note">Fecha</label><br>
+        <select id="fecha-sel" class="search"></select></div>
+    </div>
+    <p class="daysum" id="resumen-dia" hidden>Venta neta del día: <b data-source="venta_fecha" data-field="venta" class="dash-skeleton">—</b>
+      · <span data-source="venta_fecha" data-field="productos" class="dash-skeleton">—</span> productos distintos</p>
+    <div class="scroll" id="wrap-semana">
+      <table id="tabla-prod" data-source="productos" data-row-key="producto,rubro">
+        <thead><tr>
+          <th data-field="producto"><button data-k="producto">Producto</button></th>
+          <th data-field="rubro" class="tl hide-n"><button data-k="rubro">Rubro</button></th>
+          <th data-field="un_S1" class="hide-n"><button data-k="un_S1">Un. S1</button></th>
+          <th data-field="un_S2" class="hide-n"><button data-k="un_S2">Un. S2</button></th>
+          <th data-field="un_S3"><button data-k="un_S3">Un. S3</button></th>
+          <th data-source="prod_prom" data-field="prom_S1" class="hide-n"><button data-k="prom_S1">Prom./día S1</button></th>
+          <th data-source="prod_prom" data-field="prom_S2" class="hide-n"><button data-k="prom_S2">Prom./día S2</button></th>
+          <th data-source="prod_prom" data-field="prom_S3"><button data-k="prom_S3">Prom./día S3</button></th>
+          <th data-source="prod_var" data-field="var_un"><button data-k="var_un">Var. un.</button></th>
+          <th data-field="venta_S3" class="hide-n"><button data-k="venta_S3">Venta S3</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="scroll" id="wrap-dia" hidden>
+      <table id="tabla-dia" data-source="productos_dia" data-row-key="fecha,producto,rubro">
+        <thead><tr>
+          <th data-field="producto"><button data-k="producto">Producto</button></th>
+          <th data-field="rubro" class="tl hide-n"><button data-k="rubro">Rubro</button></th>
+          <th data-field="un"><button data-k="un">Unidades</button></th>
+          <th data-source="dia_prom" data-field="prom"><button data-k="prom">Prom./día sem.</button></th>
+          <th data-source="dia_prom" data-field="dif"><button data-k="dif">vs prom.</button></th>
+          <th data-field="venta"><button data-k="venta">Venta</button></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  const SEM = ['S1', 'S2', 'S3'];
+  const COL = { S1: 'var(--ac-s1)', S2: 'var(--ac-s2)', S3: 'var(--ac-s3)' };
+  const DIAS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const clp = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
+  const mm = v => '$' + (v / 1e6).toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + ' MM';
+  const int = new Intl.NumberFormat('es-CL');
+  const pct = v => (v > 0 ? '+' : '') + (v * 100).toLocaleString('es-CL', { maximumFractionDigits: 0 }) + '%';
+  const num = x => Number(x) || 0;
+
+  dash.calc('var_semanal', {
+    inputs: ['semanas'], title: 'Variación de venta por día',
+    description: 'Venta neta por día de cada semana contra la semana anterior (la semana 1 no tiene anterior).',
+    fn: (semanas) => semanas.map((s, i) => ({ sem: s.sem, var_dia: i === 0 ? null : Number(s.venta_dia) / Number(semanas[i - 1].venta_dia) - 1 }))
+  });
+  dash.calc('rubro_var', {
+    inputs: ['venta_por_rubro'], title: 'Variación por rubro S3 vs S2',
+    description: 'Venta neta del rubro en la semana 3 dividida por la de la semana 2, menos 1.',
+    fn: (venta_por_rubro) => venta_por_rubro.map(r => ({ rubro: r.rubro, var: Number(r.S2) > 0 ? Number(r.S3) / Number(r.S2) - 1 : null }))
+  });
+  dash.calc('prod_var', {
+    inputs: ['productos'], title: 'Variación de unidades S3 vs S2',
+    description: 'Unidades vendidas del producto en la semana 3 contra la semana 2; sin venta en la semana 2 queda vacío.',
+    fn: (productos) => productos.map(p => ({ producto: p.producto, rubro: p.rubro, var_un: Number(p.un_S2) > 0 ? Number(p.un_S3) / Number(p.un_S2) - 1 : null }))
+  });
+
+  const setSk = (sel, on) => document.querySelectorAll(sel).forEach(e => e.classList.toggle('dash-skeleton', on));
+  const fail = (el) => { el.innerHTML = ''; const d = document.createElement('div');
+    d.style.cssText = 'display:flex;align-items:center;justify-content:center;gap:.5rem;min-height:inherit;color:var(--color-fg-muted);font-size:var(--cds-font-size-caption)';
+    const dot = document.createElement('span'); dot.style.cssText = 'width:.375rem;height:.375rem;border-radius:50%;background:var(--color-bad)';
+    d.append(dot, document.createTextNode('Failed to load')); el.append(d); };
+
+  // ---- Encabezado + tarjetas por semana
+  function drawHeader() {
+    const s = dash.data('semanas'), v = dash.data('var_semanal');
+    const root = document.getElementById('semanas');
+    if (s.status !== 'ok') { setSk('#takeaway [data-source]', s.status === 'loading'); root.innerHTML = ''; return; }
+    const rows = s.data, vv = v.status === 'ok' ? v.data : [];
+    setSk('#takeaway [data-source]', false);
+    const s3 = rows.find(r => r.sem === 'S3'), v3 = vv.find(r => r.sem === 'S3');
+    const tk = document.querySelectorAll('#takeaway [data-source]');
+    tk[0].textContent = s3.etiqueta; tk[1].textContent = mm(num(s3.venta));
+    tk[2].textContent = v3 && v3.var_dia != null ? pct(v3.var_dia) : '—';
+    root.innerHTML = '';
+    rows.forEach(r => {
+      const c = document.createElement('div'); c.className = 'card tile';
+      const lab = document.createElement('div'); lab.className = 'lab';
+      const sw = document.createElement('span'); sw.className = 'sw'; sw.style.background = COL[r.sem];
+      const lt = document.createElement('span'); lt.dataset.source = 'semanas'; lt.dataset.field = 'etiqueta'; lt.dataset.where = 'sem=' + r.sem; lt.textContent = r.etiqueta;
+      const ld = document.createElement('span'); ld.textContent = ' · ';
+      const dd = document.createElement('span'); dd.dataset.source = 'semanas'; dd.dataset.field = 'dias'; dd.dataset.where = 'sem=' + r.sem; dd.textContent = r.dias;
+      lab.append(sw, lt, ld, dd, document.createTextNode(' días'));
+      const big = document.createElement('div'); big.className = 'big'; big.dataset.source = 'semanas'; big.dataset.field = 'venta'; big.dataset.where = 'sem=' + r.sem; big.textContent = mm(num(r.venta));
+      const row = document.createElement('div'); row.className = 'row';
+      const vd = document.createElement('span'); vd.dataset.source = 'semanas'; vd.dataset.field = 'venta_dia'; vd.dataset.where = 'sem=' + r.sem; vd.textContent = clp.format(num(r.venta_dia));
+      const u = document.createElement('span'); u.dataset.source = 'semanas'; u.dataset.field = 'unidades'; u.dataset.where = 'sem=' + r.sem; u.textContent = int.format(num(r.unidades));
+      const a = document.createElement('span'); a.append(vd, document.createTextNode(' por día'));
+      const b = document.createElement('span'); b.append(u, document.createTextNode(' unidades'));
+      row.append(a, b);
+      const vr = vv.find(x => x.sem === r.sem);
+      if (vr && vr.var_dia != null) {
+        const ch = document.createElement('span'); ch.className = vr.var_dia >= 0 ? 'up' : 'down';
+        const m = document.createElement('b'); m.dataset.source = 'var_semanal'; m.dataset.field = 'var_dia'; m.dataset.where = 'sem=' + r.sem; m.textContent = pct(vr.var_dia);
+        ch.append(m, document.createTextNode(' por día vs semana anterior')); row.append(ch);
+      }
+      c.append(lab, big, row); root.append(c);
+    });
+    const leg = document.getElementById('leg-dia'); leg.innerHTML = '';
+    rows.forEach(r => { const sp = document.createElement('span'); sp.style.setProperty('--c', COL[r.sem]); sp.textContent = r.etiqueta; leg.append(sp); });
+  }
+
+  // ---- Barras agrupadas por día de la semana
+  function drawDia() {
+    const el = document.getElementById('chart-dia'), d = dash.data('venta_por_dia');
+    el.classList.toggle('dash-skeleton', d.status === 'loading');
+    if (d.status !== 'ok') { el.innerHTML = ''; if (d.status === 'error') fail(el); return; }
+    el.innerHTML = '';
+    const rows = d.data.map(r => ({ sem: r.sem, dia: r.dia, venta: num(r.venta) }));
+    const dias = DIAS.filter(x => rows.some(r => r.dia === x));
+    const W = Math.max(300, el.clientWidth), H = 280;
+    const fmtTick = v => v === 0 ? '0' : (v / 1e6).toLocaleString('es-CL') + ' MM';
+    const y = d3.scaleLinear([0, d3.max(rows, r => r.venta) * 1.08], [H - 28, 10]).nice();
+    const svg = d3.select(el).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`);
+    const probe = svg.append('text').attr('font-size', 11).text(fmtTick(y.domain()[1]));
+    const ml = probe.node().getComputedTextLength() + 10; probe.remove();
+    const x0 = d3.scaleBand(dias, [ml, W - 4]).paddingInner(0.22).paddingOuter(0.05);
+    const x1 = d3.scaleBand(SEM, [0, x0.bandwidth()]).padding(0.12);
+    const g = svg.append('g');
+    y.ticks(4).forEach(t => {
+      g.append('line').attr('x1', ml).attr('x2', W - 4).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--cds-chart-grid)');
+      g.append('text').attr('x', ml - 8).attr('y', y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(fmtTick(t));
+    });
+    const short = { 'Lunes': 'Lun', 'Martes': 'Mar', 'Miércoles': 'Mié', 'Jueves': 'Jue', 'Viernes': 'Vie', 'Sábado': 'Sáb', 'Domingo': 'Dom' };
+    dias.forEach(dia => g.append('text').attr('x', x0(dia) + x0.bandwidth() / 2).attr('y', H - 8).attr('text-anchor', 'middle')
+      .attr('font-size', 11).attr('fill', 'var(--color-fg-muted)').text(W < 520 ? short[dia] : dia));
+    g.append('line').attr('x1', ml).attr('x2', W - 4).attr('y1', y(0)).attr('y2', y(0)).attr('stroke', 'var(--cds-chart-axis)');
+    const tip = d3.select(el).append('div').attr('class', 'tip').style('opacity', 0);
+    const lab = { S1: 'Sem 1 · 5-11 oct', S2: 'Sem 2 · 13-18 oct', S3: 'Sem 3 · 20-25 oct' };
+    const bars = g.selectAll('rect.b').data(rows).join('rect').attr('class', 'b')
+      .attr('x', r => x0(r.dia) + x1(r.sem)).attr('width', x1.bandwidth())
+      .attr('y', r => y(r.venta)).attr('height', r => Math.max(0, y(0) - y(r.venta)))
+      .attr('rx', 3).attr('fill', r => COL[r.sem]);
+    g.selectAll('rect.hit').data(dias).join('rect').attr('class', 'hit').attr('x', dia => x0(dia)).attr('width', x0.bandwidth())
+      .attr('y', 0).attr('height', H - 28).attr('fill', 'transparent')
+      .on('mousemove', (ev, dia) => {
+        bars.attr('opacity', r => r.dia === dia ? 1 : 0.45);
+        tip.html(''); tip.append('div').attr('class', 'h').text(dia);
+        SEM.forEach(s => { const r = rows.find(q => q.dia === dia && q.sem === s); if (!r) return;
+          const ln = tip.append('div'); ln.append('span').style('display', 'inline-block').style('width', '.6rem').style('height', '.6rem')
+            .style('border-radius', '2px').style('margin-right', '.35rem').style('background', COL[s]);
+          ln.append('span').text(lab[s] + ': ' + clp.format(r.venta)); });
+        const [mx, my] = d3.pointer(ev, el); const tw = tip.node().offsetWidth;
+        tip.style('left', Math.min(Math.max(0, mx + 12), el.clientWidth - tw) + 'px').style('top', Math.max(0, my - 60) + 'px').style('opacity', 1);
+      })
+      .on('mouseleave', () => { bars.attr('opacity', 1); tip.style('opacity', 0); });
+  }
+
+  // ---- Tabla de rubros
+  function drawRubros() {
+    const t = document.querySelector('#tabla-rubros tbody'), d = dash.data('venta_por_rubro'), v = dash.data('rubro_var');
+    t.innerHTML = '';
+    if (d.status !== 'ok') { if (d.status === 'error') { const tr = t.insertRow(); const td = tr.insertCell(); td.colSpan = 5; fail(td); } return; }
+    const rows = d.data.slice().sort((a, b) => num(b.S3) - num(a.S3));
+    const vv = v.status === 'ok' ? v.data : [];
+    const tot3 = d3.sum(rows, r => num(r.S3)), maxS3 = d3.max(rows, r => num(r.S3));
+    rows.forEach(r => {
+      const tr = t.insertRow();
+      const c0 = tr.insertCell(); c0.textContent = r.rubro;
+      const c1 = tr.insertCell(); c1.className = 'hide-n'; c1.textContent = mm(num(r.S1));
+      const c2 = tr.insertCell(); c2.textContent = mm(num(r.S2));
+      const c3 = tr.insertCell(); c3.textContent = mm(num(r.S3));
+      const bar = document.createElement('span'); bar.className = 'bar'; bar.style.width = (num(r.S3) / maxS3 * 3.5) + 'rem';
+      bar.title = tot3 ? d3.format('.0%')(num(r.S3) / tot3) + ' de la semana' : ''; c3.append(bar);
+      const c4 = tr.insertCell(); const x = vv.find(q => q.rubro === r.rubro);
+      if (x && x.var != null) { c4.textContent = pct(x.var); c4.className = x.var >= 0 ? 'up' : 'down'; } else c4.textContent = num(r.S3) > 0 ? 'nuevo' : '—';
+    });
+  }
+
+  // ---- Ranking de productos (vista semana / vista día)
+  dash.calc('prod_prom', {
+    inputs: ['productos', 'semanas'], title: 'Promedio diario por producto',
+    description: 'Unidades del producto en cada semana divididas por los días que abrió esa semana.',
+    fn: (productos, semanas) => {
+      const dias = Object.fromEntries(semanas.map(s => [s.sem, Number(s.dias)]));
+      return productos.map(p => ({ producto: p.producto, rubro: p.rubro,
+        prom_S1: Number(p.un_S1) / dias.S1, prom_S2: Number(p.un_S2) / dias.S2, prom_S3: Number(p.un_S3) / dias.S3 }));
+    }
+  });
+  dash.calc('dia_prom', {
+    inputs: ['productos_dia', 'semanas'], title: 'Día vs promedio de su semana',
+    description: 'Para cada fecha y producto: promedio diario del producto en esa semana y diferencia del día contra ese promedio.',
+    fn: (productos_dia, semanas) => {
+      const dias = Object.fromEntries(semanas.map(s => [s.sem, Number(s.dias)]));
+      const tot = new Map();
+      productos_dia.forEach(r => { const k = r.sem + '|' + r.producto + '|' + r.rubro; tot.set(k, (tot.get(k) || 0) + Number(r.un)); });
+      return productos_dia.map(r => { const prom = tot.get(r.sem + '|' + r.producto + '|' + r.rubro) / dias[r.sem];
+        return { fecha: r.fecha, producto: r.producto, rubro: r.rubro, prom, dif: Number(r.un) / prom - 1 }; });
+    }
+  });
+  dash.calc('venta_fecha', {
+    inputs: ['productos_dia'], title: 'Venta por fecha',
+    description: 'Venta neta y número de productos distintos vendidos en cada fecha.',
+    fn: (productos_dia) => Array.from(d3.rollup(productos_dia, v => ({ venta: d3.sum(v, r => Number(r.venta)), productos: v.length }), r => r.fecha),
+      ([fecha, x]) => ({ fecha, venta: x.venta, productos: x.productos }))
+  });
+
+  let vista = 'semana';
+  const sorts = { semana: { k: 'un_S3', dir: -1 }, dia: { k: 'un', dir: -1 } };
+  const fmtProm = v => v.toLocaleString('es-CL', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  const fmtFecha = f => { const d = new Date(f + 'T12:00:00');
+    return d.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'short' }); };
+
+  function setVista(v) {
+    vista = v;
+    document.getElementById('vista-semana').setAttribute('aria-selected', v === 'semana');
+    document.getElementById('vista-dia').setAttribute('aria-selected', v === 'dia');
+    ['wrap-semana', 'nota-semana'].forEach(id => document.getElementById(id).hidden = v !== 'semana');
+    ['wrap-dia', 'nota-dia', 'ctrl-fecha', 'resumen-dia'].forEach(id => document.getElementById(id).hidden = v !== 'dia');
+    drawProd();
+  }
+  document.getElementById('vista-semana').addEventListener('click', () => setVista('semana'));
+  document.getElementById('vista-dia').addEventListener('click', () => setVista('dia'));
+  document.getElementById('buscar-prod').addEventListener('input', () => drawProd());
+  document.getElementById('fecha-sel').addEventListener('change', () => drawProd());
+  ['tabla-prod', 'tabla-dia'].forEach(id => document.querySelectorAll('#' + id + ' th button').forEach(b => b.addEventListener('click', () => {
+    const s = sorts[vista], k = b.dataset.k;
+    if (s.k === k) s.dir = -s.dir; else { s.k = k; s.dir = (k === 'producto' || k === 'rubro') ? 1 : -1; }
+    drawProd();
+  })));
+
+  const sortRows = (rows, s) => rows.sort((a, b) => {
+    const A = a[s.k], B = b[s.k];
+    if (s.k === 'producto' || s.k === 'rubro') return s.dir * String(A).localeCompare(String(B), 'es');
+    const nA = A == null || isNaN(A) ? -Infinity : Number(A), nB = B == null || isNaN(B) ? -Infinity : Number(B);
+    return s.dir * (nA - nB);
+  });
+  const ariaSort = (id, s) => document.querySelectorAll('#' + id + ' th').forEach(th => { const b = th.querySelector('button');
+    th.setAttribute('aria-sort', b && b.dataset.k === s.k ? (s.dir > 0 ? 'ascending' : 'descending') : 'none'); });
+  const qText = () => document.getElementById('buscar-prod').value.trim().toLowerCase();
+  const failRow = (t, n) => { const tr = t.insertRow(); const td = tr.insertCell(); td.colSpan = n; fail(td); };
+
+  function drawProd() { if (vista === 'semana') drawSemana(); else drawFecha(); }
+
+  function drawSemana() {
+    const t = document.querySelector('#tabla-prod tbody'), d = dash.data('productos'), v = dash.data('prod_var'), p = dash.data('prod_prom');
+    t.innerHTML = ''; ariaSort('tabla-prod', sorts.semana);
+    if (d.status !== 'ok') { if (d.status === 'error') failRow(t, 10); return; }
+    const key = r => r.producto + '|' + r.rubro;
+    const vv = new Map((v.status === 'ok' ? v.data : []).map(x => [key(x), x.var_un]));
+    const pp = new Map((p.status === 'ok' ? p.data : []).map(x => [key(x), x]));
+    const q = qText();
+    const rows = sortRows(d.data.map(r => ({ ...r, var_un: vv.get(key(r)), ...(pp.get(key(r)) || {}) }))
+      .filter(r => num(r.un_S1) + num(r.un_S2) + num(r.un_S3) > 0)
+      .filter(r => !q || (r.producto + ' ' + r.rubro).toLowerCase().includes(q)), sorts.semana);
+    rows.forEach(r => {
+      const tr = t.insertRow(); tr.dataset.key = encodeURIComponent(r.producto) + ',' + encodeURIComponent(r.rubro);
+      const cell = (txt, cls) => { const c = tr.insertCell(); c.textContent = txt; if (cls) c.className = cls; return c; };
+      cell(r.producto); cell(r.rubro, 'tl hide-n');
+      cell(int.format(num(r.un_S1)), 'hide-n'); cell(int.format(num(r.un_S2)), 'hide-n'); cell(int.format(num(r.un_S3)));
+      cell(r.prom_S1 != null ? fmtProm(r.prom_S1) : '—', 'hide-n'); cell(r.prom_S2 != null ? fmtProm(r.prom_S2) : '—', 'hide-n');
+      cell(r.prom_S3 != null ? fmtProm(r.prom_S3) : '—');
+      if (r.var_un != null) cell(pct(r.var_un), r.var_un >= 0 ? 'up' : 'down'); else cell(num(r.un_S3) > 0 ? 'nuevo' : '—');
+      cell(clp.format(num(r.venta_S3)), 'hide-n');
+    });
+  }
+
+  function drawFecha() {
+    const t = document.querySelector('#tabla-dia tbody'), d = dash.data('productos_dia'), p = dash.data('dia_prom'), vf = dash.data('venta_fecha');
+    const sel = document.getElementById('fecha-sel');
+    t.innerHTML = ''; ariaSort('tabla-dia', sorts.dia);
+    const sumEls = document.querySelectorAll('#resumen-dia [data-source]');
+    if (d.status !== 'ok') { sumEls.forEach(e => e.classList.toggle('dash-skeleton', d.status === 'loading')); if (d.status === 'error') failRow(t, 6); return; }
+    const fechas = Array.from(new Set(d.data.map(r => r.fecha))).sort();
+    if (sel.options.length !== fechas.length) {
+      const prev = sel.value; sel.innerHTML = '';
+      fechas.forEach(f => { const o = document.createElement('option'); o.value = f; o.textContent = fmtFecha(f); sel.append(o); });
+      sel.value = fechas.includes(prev) ? prev : fechas[fechas.length - 1];
+    }
+    const f = sel.value;
+    const tot = (vf.status === 'ok' ? vf.data : []).find(x => x.fecha === f);
+    sumEls.forEach(e => { e.classList.remove('dash-skeleton'); e.dataset.where = 'fecha=' + f; });
+    sumEls[0].textContent = tot ? clp.format(tot.venta) : '—';
+    sumEls[1].textContent = tot ? int.format(tot.productos) : '—';
+    const key = r => r.fecha + '|' + r.producto + '|' + r.rubro;
+    const pp = new Map((p.status === 'ok' ? p.data : []).map(x => [key(x), x]));
+    const q = qText();
+    const rows = sortRows(d.data.filter(r => r.fecha === f).map(r => ({ ...r, un: num(r.un), venta: num(r.venta), ...(pp.get(key(r)) ? { prom: pp.get(key(r)).prom, dif: pp.get(key(r)).dif } : {}) }))
+      .filter(r => !q || (r.producto + ' ' + r.rubro).toLowerCase().includes(q)), sorts.dia);
+    rows.forEach(r => {
+      const tr = t.insertRow();
+      tr.dataset.key = [r.fecha, r.producto, r.rubro].map(encodeURIComponent).join(',');
+      const cell = (txt, cls) => { const c = tr.insertCell(); c.textContent = txt; if (cls) c.className = cls; return c; };
+      cell(r.producto); cell(r.rubro, 'tl hide-n'); cell(int.format(r.un));
+      cell(r.prom != null ? fmtProm(r.prom) : '—');
+      if (r.dif != null && isFinite(r.dif)) cell(pct(r.dif), r.dif >= 0 ? 'up' : 'down'); else cell('—');
+      cell(clp.format(r.venta));
+    });
+  }
+
+  dash.onData(() => { drawHeader(); drawDia(); drawRubros(); drawProd(); });
+})();
+</script>
+</div>
+<script>acceso.soloAdmin().then(() => dash.load(["semanas", "venta_por_dia", "venta_por_rubro", "productos", "productos_dia"]));</script>
+<script>
+(async () => {
+  try {
+    await acceso.soloAdmin();
+    const db = await acceso.cliente();
+    const [vd, fa] = await Promise.all([
+      db.from('ventas_dia').select('*').order('fecha_comercial', { ascending: false }).limit(31),
+      db.from('cierres_faltantes').select('cierre')]);
+    if (vd.error || !vd.data.length) return;
+    const sec = document.getElementById('cierres'); sec.hidden = false;
+    const clp = n => '$' + Math.round(Number(n)).toLocaleString('es-CL');
+    const dif = n => (Number(n) > 0 ? '+' : Number(n) < 0 ? '−' : '') + clp(Math.abs(Number(n)));
+    const dia = f => new Date(f + 'T12:00:00').toLocaleDateString('es-CL', { weekday: 'short', day: 'numeric', month: 'short' });
+    const tb = sec.querySelector('tbody');
+    vd.data.forEach(r => {
+      const tr = document.createElement('tr');
+      [dia(r.fecha_comercial), (r.turnos || '').replace(/TURNO /g, '').toLowerCase(), clp(r.efectivo), clp(r.debito), clp(r.propina),
+       clp(r.total_iva), clp(r.total_neto), Number(r.dif_total) === 0 ? '$0' : dif(r.dif_total)].forEach((t, i) => {
+        const td = document.createElement('td'); td.textContent = t;
+        if (i === 7 && Number(r.dif_total) !== 0) td.className = 'down';
+        tr.appendChild(td); });
+      tb.appendChild(tr);
+    });
+    const u = vd.data[0], difs = vd.data.filter(r => Number(r.dif_total) !== 0).length, falt = (fa.data || []).map(x => x.cierre);
+    const tile = (lab, big, row) => { const d = document.createElement('div'); d.className = 'card tile';
+      const a = document.createElement('span'); a.className = 'lab'; a.textContent = lab;
+      const b = document.createElement('span'); b.className = 'big'; b.textContent = big;
+      const c = document.createElement('span'); c.className = 'row'; c.textContent = row; d.append(a, b, c); return d; };
+    const T = document.getElementById('cierres-tiles');
+    T.append(tile('Último día cargado: ' + dia(u.fecha_comercial), clp(u.total_iva), 'neto ' + clp(u.total_neto) + ' · ' + u.cierres + (u.cierres > 1 ? ' cierres' : ' cierre')),
+      tile('Días con diferencia de caja', String(difs), 'de ' + vd.data.length + ' días cargados'),
+      tile('Cierres que faltan', falt.length ? falt.join(', ') : 'Ninguno', 'entre el primero y el último cargados'));
+  } catch (e) { /* sin datos de cierres: la sección queda oculta */ }
+})();
+</script>
+</body>
+</html>

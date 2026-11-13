@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Estaciones La Fenomenal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Libre+Franklin:wght@400;500;600&display=swap">
+<style>
+/* Layout: banda navy con fecha y pestañas por estación; debajo, lista de checks a pantalla completa pensada para el celular del equipo. */
+:root {
+  --navy: #0D338E; --navy-deep: #092566; --cream: #F4F6FA; --panel: #FFFFFF; --ink: #1b212e; --muted: #686f80;
+  --rule: #D6DCE8; --ok: #1f7a4a; --ok-bg: #e3f1e8; --warn: #9a5b00; --warn-bg: #fbeed6; --band-fg: #F4F6FA;
+  --display: 'EB Garamond', Georgia, 'Times New Roman', serif;
+  --body: 'Libre Franklin', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --navy: #9cb6f2; --navy-deep: #0a1d4d; --cream: #131722; --panel: #1b212e; --ink: #ebeef5; --muted: #a1a8b8;
+  --rule: #32394a; --ok: #6fd39c; --ok-bg: #173826; --warn: #f0b95c; --warn-bg: #3a2b12; --band-fg: #ebeef5; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --navy: #9cb6f2; --navy-deep: #0a1d4d; --cream: #131722; --panel: #1b212e; --ink: #ebeef5; --muted: #a1a8b8;
+  --rule: #32394a; --ok: #6fd39c; --ok-bg: #173826; --warn: #f0b95c; --warn-bg: #3a2b12; --band-fg: #ebeef5; color-scheme: dark; }
+body { background: var(--cream); color: var(--ink); font-family: var(--body); font-size: 15px; }
+.band { background: var(--navy-deep); color: var(--band-fg); position: sticky; top: calc(var(--sh-h, 56px) + env(safe-area-inset-top, 0px)); z-index: 5; border-top: 1px solid rgba(255,255,255,.12); }
+.band-in { max-width: 60rem; margin: 0 auto; padding-block: 14px 0; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 10px; }
+.top { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; }
+.brand { font-family: var(--display); font-weight: 600; font-size: 1.15rem; letter-spacing: .01em; margin: 0; }
+.brand small { font-family: var(--body); font-weight: 400; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; opacity: .75; margin-left: .5rem; }
+.date { display: flex; align-items: center; gap: 6px; }
+.date { flex-wrap: wrap; justify-content: flex-end; }
+.date[hidden] { display: none; }
+@media (max-width: 560px) { .date { justify-content: flex-start; } }
+.date button { font: inherit; font-weight: 500; color: var(--band-fg); background: transparent; border: 1px solid color-mix(in srgb, var(--band-fg) 35%, transparent); border-radius: 8px; padding: 6px 10px; min-height: 36px; min-width: 44px; cursor: pointer; }
+.date button[aria-pressed="true"] { background: var(--band-fg); color: var(--navy-deep); border-color: var(--band-fg); font-weight: 600; }
+.fechabox { display: grid; justify-items: end; gap: 6px; }
+.dianom { font-family: var(--display); font-weight: 600; font-size: 2rem; line-height: 1; letter-spacing: .01em; color: #fff; }
+@media (max-width: 560px) { .fechabox { justify-items: start; } }
+.tabs { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; }
+.tabs::-webkit-scrollbar { display: none; }
+.tabs a { color: var(--band-fg); opacity: .72; text-decoration: none; padding: 10px 12px 12px; white-space: nowrap; border-bottom: 3px solid transparent; font-weight: 500; }
+.tabs a[aria-current="page"] { opacity: 1; border-bottom-color: var(--band-fg); }
+.tabs a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--navy); outline-offset: 2px; }
+main { max-width: 60rem; margin: 0 auto; padding-block: 18px 48px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 18px; }
+h2 { font-family: var(--display); font-weight: 600; font-size: 1.6rem; margin: 0; text-wrap: balance; }
+h3 { font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0; }
+.sub { color: var(--muted); margin: 4px 0 0; max-width: 62ch; line-height: 1.45; }
+.status { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.meter { flex: 1 1 12rem; height: 8px; background: var(--rule); border-radius: 99px; overflow: hidden; min-width: 8rem; }
+.meter i { display: block; height: 100%; background: var(--ok); border-radius: 99px; transition: width .3s; }
+.count { font-variant-numeric: tabular-nums; font-weight: 600; }
+.pill { display: inline-flex; align-items: center; gap: 6px; font-size: .78rem; font-weight: 600; padding: 3px 9px; border-radius: 99px; }
+.pill.ok { color: var(--ok); background: var(--ok-bg); } .pill.warn { color: var(--warn); background: var(--warn-bg); }
+.group { display: grid; gap: 8px; }
+.list { display: grid; gap: 0; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; overflow: hidden; }
+.item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; border-top: 1px solid var(--rule); cursor: pointer; min-height: 52px; }
+.item:first-child { border-top: 0; }
+.item input { width: 24px; height: 24px; accent-color: var(--ok); margin: 0; cursor: pointer; }
+.item .name { min-width: 0; line-height: 1.3; }
+.item .fl { display: inline-flex; align-items: center; min-height: 32px; margin-top: 6px; padding: 0 12px; font-size: .8rem; font-weight: 600; color: var(--navy); border: 1px solid var(--navy); border-radius: 99px; text-decoration: none; }
+.fichas-btn { display: inline-flex; align-items: center; min-height: 44px; margin: 2px 0 12px; padding: 0 16px; border: 1px solid var(--navy); border-radius: 999px; font-size: .9rem; color: var(--navy); text-decoration: none; }
+.item .meta { display: block; font-size: .76rem; color: var(--muted); margin-top: 2px; }
+.item .qty { font-variant-numeric: tabular-nums; font-weight: 600; text-align: right; white-space: nowrap; }
+.item .qty small { font-weight: 400; color: var(--muted); margin-left: 3px; }
+.item.done { background: color-mix(in srgb, var(--ok-bg) 55%, var(--panel)); }
+.item.done .name > span:first-child { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--ink) 40%, transparent); }
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.tools input[type=search] { font: inherit; flex: 1 1 14rem; padding: 9px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--panel); color: var(--ink); min-width: 0; }
+.tools label { display: inline-flex; gap: 6px; align-items: center; color: var(--muted); font-size: .85rem; cursor: pointer; }
+.cards { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr)); }
+.card { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.card h4 { font-family: var(--display); font-size: 1.25rem; font-weight: 600; margin: 0; }
+.card a { color: var(--navy); font-weight: 500; font-size: .85rem; }
+.pend { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; font-size: .86rem; max-height: 12rem; overflow: auto; }
+.pend li { display: flex; justify-content: space-between; gap: 8px; }
+.pend li span:last-child { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.chk { margin: 0; padding: 0; list-style: none; font-size: .86rem; max-height: 24rem; overflow: auto; border-top: 1px solid var(--rule); }
+.chk li { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); }
+.chk .tick { width: 18px; height: 18px; border: 1.5px solid var(--rule); border-radius: 4px; display: grid; place-items: center; font-size: .75rem; font-weight: 700; line-height: 1; }
+.chk li.done .tick { background: var(--ok); border-color: var(--ok); color: var(--panel); }
+.chk li.done { color: var(--muted); }
+.chk .name { min-width: 0; line-height: 1.25; }
+.chk .meta { display: block; font-size: .72rem; color: var(--ok); }
+.chk .q { color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.who { font-size: .78rem; color: var(--muted); }
+.notice { background: var(--panel); border: 1px dashed var(--rule); border-radius: 12px; padding: 18px; color: var(--muted); line-height: 1.5; }
+.week { overflow-x: auto; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; }
+.week table { border-collapse: collapse; width: 100%; font-size: .84rem; font-variant-numeric: tabular-nums; }
+.week th, .week td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: right; white-space: nowrap; }
+.week th:first-child, .week td:first-child { text-align: left; white-space: normal; min-width: 11rem; }
+.week thead th { color: var(--muted); font-weight: 600; font-size: .75rem; letter-spacing: .05em; text-transform: uppercase; }
+.week td.today, .week th.today { background: color-mix(in srgb, var(--navy) 9%, transparent); }
+.week tfoot td { font-weight: 600; }
+.ped { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 16px; display: grid; gap: 10px; min-width: 0; }
+.ped.hoy { border-color: var(--navy); box-shadow: 0 0 0 1px var(--navy); }
+.ped header { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.ped h4 { font-family: var(--display); font-size: 1.2rem; font-weight: 600; margin: 0; }
+.ped .cubre { font-size: .8rem; color: var(--muted); }
+.ped details summary { cursor: pointer; font-weight: 600; font-size: .9rem; }
+.ped table { width: 100%; border-collapse: collapse; font-size: .86rem; font-variant-numeric: tabular-nums; margin-top: 6px; }
+.ped td { padding: 5px 0; border-bottom: 1px solid var(--rule); }
+.ped td:last-child { text-align: right; white-space: nowrap; font-weight: 600; }
+.ped td.fam { padding-top: 12px; font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 600; border-bottom: 0; }
+.ped .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.ped th { text-align: left; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 4px 0; border-bottom: 1px solid var(--rule); }
+.ped th:nth-child(n+2), .ped td.sug { text-align: right; white-space: nowrap; }
+.ped td.sug { color: var(--muted); font-weight: 400; padding-right: 10px; }
+.ped td:last-child, .ped th:last-child { width: 5rem; text-align: right; }
+.ped th.pv, .ped td.prov { text-align: left; width: 5.6rem; padding-right: 6px; white-space: normal; font-weight: 500; font-size: .76rem; line-height: 1.2; }
+.ped td.prov.sin { color: var(--muted); font-style: italic; font-weight: 400; }
+.ped td.sug { width: 3.6rem; padding-right: 6px; font-size: .8rem; }
+.ped td.pn { font-size: .84rem; line-height: 1.25; padding-right: 6px; }
+.ped select.provsel { font: inherit; font-size: .76rem; width: 100%; max-width: 5.6rem; padding: 4px 2px; border: 1px solid var(--rule); border-radius: 8px; background: var(--cream); color: var(--ink); }
+.ped select.provsel.sin { color: var(--muted); font-style: italic; }
+.ped input.alt { font: inherit; width: 4.6rem; padding: 5px 8px; border: 1px solid var(--rule); border-radius: 8px; background: var(--cream); color: var(--ink); text-align: right; font-weight: 600; }
+.ped input.alt::placeholder { color: color-mix(in srgb, var(--muted) 55%, transparent); font-weight: 400; }
+.dias-ped { display: grid; gap: 18px; }
+.tabs a.cambiar { margin-left: auto; opacity: .85; font-weight: 400; text-decoration: underline; text-underline-offset: 3px; }
+.selector { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); }
+.selector button { font: inherit; text-align: left; cursor: pointer; background: var(--panel); color: var(--ink); border: 1px solid var(--rule); border-radius: 14px; padding: 20px 18px; min-height: 84px; display: grid; gap: 4px; }
+.selector button:hover { border-color: var(--navy); }
+.selector b { font-family: var(--display); font-size: 1.4rem; font-weight: 600; }
+.selector span { color: var(--muted); font-size: .85rem; }
+.foot { color: var(--muted); font-size: .8rem; line-height: 1.5; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--cream); padding: 10px 16px; border-radius: 10px; font-size: .88rem; z-index: 20; max-width: calc(100% - 32px); }
+@media (prefers-reduced-motion: reduce) { .meter i { transition: none; } }
+.dlg { border: 1px solid var(--rule); border-radius: 14px; background: var(--panel); color: var(--ink); padding: 20px; width: min(22rem, calc(100% - 32px)); }
+.dlg::backdrop { background: rgb(0 0 0 / .45); }
+.dlg form { display: grid; gap: 12px; }
+.dlg label { display: grid; gap: 4px; font-size: .85rem; color: var(--muted); }
+.dlg input { font: inherit; padding: 10px 12px; border: 1px solid var(--rule); border-radius: 10px; background: var(--cream); color: var(--ink); }
+.dlg .acts { display: flex; gap: 8px; justify-content: flex-end; }
+.btn { font: inherit; font-weight: 600; padding: 9px 16px; border-radius: 10px; border: 1px solid var(--rule); background: transparent; color: var(--ink); cursor: pointer; }
+.btn.pri { background: var(--navy-deep); border-color: var(--navy-deep); color: #F4F6FA; }
+.dlg .err { color: var(--warn); font-size: .85rem; margin: 0; min-height: 1.2em; }
+.cred { font-size: .82rem; color: var(--muted); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.cred input { font: inherit; padding: 6px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); color: var(--ink); width: 14rem; max-width: 100%; }
+
+.seg { display: flex; gap: 8px; }
+.seg button { font: inherit; font-weight: 600; flex: 1; min-height: 44px; padding: 0 12px; border: 1px solid var(--navy); background: var(--panel); color: var(--navy); border-radius: 10px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--navy); color: var(--cream); }
+@media (prefers-color-scheme: dark) { .seg button[aria-pressed="true"] { color: #131722; } }
+.avisoped { border-radius: 12px; padding: 12px 14px; line-height: 1.4; background: var(--warn-bg); color: var(--warn); font-weight: 500; }
+.avisoped.ya { background: var(--ok-bg); color: var(--ok); }
+.avisoped b { font-weight: 700; }
+.pedir { display: inline-block; margin: 6px 0 2px; }
+td small.prov { display: block; color: var(--muted); font-size: .74rem; margin-top: 1px; }
+</style>
+</head>
+<body data-seccion="estaciones">
+
+
+<div class="band"><div class="band-in">
+  <div class="top">
+    <h1 class="brand">Checklist por estación</h1>
+    <div class="fechabox">
+    <span class="dianom" id="dianom" aria-live="polite"></span>
+    <div class="date" id="dias" role="group" aria-label="Día de la semana"></div>
+    <div class="date" id="fams" role="group" aria-label="Familia de pedido" hidden></div>
+    </div>
+  </div>
+  <nav class="tabs" aria-label="Vistas">
+    <a href="#admin" data-v="admin">Admin / Chef</a>
+    <a href="#bolleria" data-v="bolleria">Bollería y pastelería</a>
+    <a href="#panaderia" data-v="panaderia">Panadería</a>
+    <a href="#cocina" data-v="cocina">Cocina</a>
+    <a href="#barra" data-v="barra">Barra</a>
+    <a href="#" id="cambiar" class="cambiar" hidden>Cambiar de estación</a>
+  </nav>
+</div></div>
+
+<main id="main">
+  <div class="notice" id="boot">Cargando la lista de stocks del día. Cada estación verá aquí sus insumos y preparaciones con la cantidad que debe tener antes de abrir.</div>
+</main>
+<div class="toast" id="toast" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="../marca.js"></script>
+<script src="../acceso.js"></script>
+<script src="../shell.js"></script>
+<script>
+(function () {
+  const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+  const EST = { bolleria: 'Bollería y pastelería', panaderia: 'Panadería', cocina: 'Cocina', barra: 'Barra' };
+  const UN = { un: 'un', kg: 'kg', lt: 'lt', bot: 'bot', entero: 'entero', atado: 'atado', frasco: 'frasco' };
+  const $ = s => document.querySelector(s);
+  const main = $('#main');
+  const S = { vista: 'admin', fecha: hoyISO(), plan: {}, meta: null, checks: {}, db: null, user: null, uid: null, canWrite: true, names: {}, q: '', soloPend: false, unsubChecks: null, err: null };
+
+  function hoyISO() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
+  function dia(f) { return DIAS[new Date(f + 'T12:00:00').getDay()]; }
+  function fmtF(f) { return dia(f).toLowerCase(); }  // la vista trabaja por día de la semana; la fecha solo ordena los checks
+  function shift(f, n) { const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+  // menos de 1 kg se muestra en gramos (Pablo, 28-oct)
+  const enG = (v, un) => un === 'kg' && Number(v) > 0 && Number(v) < 1;
+  function cant(v, un) { return enG(v, un) ? [Math.round(Number(v) * 1000).toLocaleString('es-CL'), 'g'] : [qty(v, un), UN[un] || un]; }
+  const cantTxt = (v, un) => cant(v, un).join(' ');
+  function qty(v, un) { const n = Number(v); const s = (un === 'kg' || un === 'lt') ? n.toLocaleString('es-CL', { maximumFractionDigits: 1 }) : n.toLocaleString('es-CL'); return s; }
+  function el(tag, attrs, ...kids) { const e = document.createElement(tag); if (attrs) for (const k in attrs) { if (k === 'class') e.className = attrs[k]; else if (k === 'text') e.textContent = attrs[k]; else e.setAttribute(k, attrs[k]); } kids.flat().forEach(k => k != null && e.append(k)); return e; }
+  function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => t.hidden = true, 3500); }
+  const docId = (f, est) => f + '_' + est;
+
+  // ---- navegación
+  // cada equipo elige su vista una vez (queda recordada); el admin ve todas las pestañas
+  const VISTAS = { admin: ['Admin / Chef', 'Avance de todas las estaciones'], bolleria: ['Bollería y pastelería', 'Croissants, rolls, cookies, tortas y postres del día'], panaderia: ['Panadería', 'Panes, hogazas, moldes y masas del día'], cocina: ['Cocina', 'Cuarto caliente: preparaciones, salsas, rellenos y platos'], barra: ['Barra', 'Café, bebidas, jugos y todo lo de la barra'] };
+  function getModo() { try { return localStorage.getItem('lafenomenal_modo'); } catch (e) { return S.modoMem || null; } }
+  function setModo(m) { S.modoMem = m; try { m ? localStorage.setItem('lafenomenal_modo', m) : localStorage.removeItem('lafenomenal_modo'); } catch (e) {} }
+  function readHash() { const h = location.hash.slice(1), modo = getModo();
+    if (h === 'pedidos') S.vista = 'pedidos';   // sección Compras: la ve cualquiera con sesión, sin elegir estación
+    else if (!modo) S.vista = 'selector';
+    else if (modo !== 'admin') S.vista = modo;
+    else S.vista = ['admin', 'bolleria', 'panaderia', 'cocina', 'barra', 'pedidos'].includes(h) ? h : 'admin';
+    document.querySelectorAll('.tabs a[data-v]').forEach(a => a.hidden = !(modo === 'admin' || a.dataset.v === modo));
+    $('#cambiar').hidden = !modo || S.vista === 'pedidos';
+    document.querySelector('.tabs').hidden = S.vista === 'pedidos';
+    document.querySelector('.brand').textContent = S.vista === 'pedidos' ? 'Compras' : 'Checklist por estación';
+    if (window.shell) { shell.miga([[S.vista === 'pedidos' ? 'Compras' : 'Checklist por estación']]); shell.seccion(S.vista === 'pedidos' ? 'compras' : 'estaciones'); }
+    $('#dias').hidden = S.vista === 'pedidos'; $('#fams').hidden = S.vista !== 'pedidos';
+    $('#dianom').textContent = S.vista === 'pedidos' ? (S.fam || 'Pedidos') : dia(S.fecha);
+    document.querySelectorAll('.tabs a').forEach(a => a.dataset.v === S.vista ? a.setAttribute('aria-current', 'page') : a.removeAttribute('aria-current'));
+    render(); }
+  window.addEventListener('hashchange', readHash);
+  $('#cambiar').addEventListener('click', e => { e.preventDefault(); setModo(null); history.replaceState(null, '', location.pathname); readHash(); });
+  // semana de trabajo martes-domingo que contiene hoy (el lunes ya muestra la semana que empieza mañana).
+  // Los checks se guardan con la fecha real, así cada semana parte en blanco.
+  const SEMANA = ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  function martesDeSemana() { const h = hoyISO(), w = new Date(h + 'T12:00:00').getDay(); return shift(h, w === 1 ? 1 : w === 0 ? -5 : 2 - w); }
+  const fechaDe = d => shift(martesDeSemana(), SEMANA.indexOf(d));
+  if (dia(S.fecha) === 'Lunes') S.fecha = martesDeSemana();
+  SEMANA.forEach(d => { const b = el('button', { type: 'button', 'data-d': d, text: d.slice(0, 3) }); b.addEventListener('click', () => setFecha(fechaDe(d))); $('#dias').append(b); });
+  function setFecha(f) { S.fecha = f; diaNom(); subChecks(); render(); }
+  function diaNom() { if (S.vista !== 'pedidos') $('#dianom').textContent = dia(S.fecha); document.querySelectorAll('#dias button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === dia(S.fecha)))); }
+  diaNom();
+
+  // ---- datos (2-nov-2026: todo con sesión, ver ../acceso.js): plan y pedidos en el bucket privado; checks en Supabase vía marcar()
+  async function boot() {
+    readHash();
+    if (!window.supabase || !window.acceso) { S.err = 'No se pudo conectar con la base de checks. Revisa la conexión y recarga.'; render(); return; }
+    S.db = await acceso.cliente();
+    try { const j = JSON.parse(await acceso.archivo('estaciones/plan.json')); S.plan = j.plan; S.meta = j.meta; S.loaded = true;
+      try { S.pedidos = JSON.parse(await acceso.archivo('estaciones/pedidos.json')); } catch (e) { S.pedidos = null; }
+      try { S.admin = await acceso.esAdmin(); } catch (e) { S.admin = false; }
+      try {  // proveedor de cada producto (lo edita administración): lista abreviada + asignación
+        const [l, a] = await Promise.all([S.db.from('proveedores_lista').select('corto').order('orden'), S.db.from('pedido_proveedor').select('insumo_cod,proveedor')]);
+        S.lista = (l.data || []).map(r => r.corto); S.provs = {}; (a.data || []).forEach(r => { if (r.proveedor) S.provs[r.insumo_cod] = r.proveedor; });
+      } catch (e) { S.lista = []; S.provs = {}; }
+      try { S.fichas = JSON.parse(await acceso.archivo('fichas/mapa.json')); } catch (e) { S.fichas = {}; } }
+    catch (e) { S.err = 'No se pudo leer el plan de stocks. Recarga la página.'; render(); return; }
+    S.db.channel('checks').on('postgres_changes', { event: '*', schema: 'public', table: 'checks' }, p => {
+      const r = p.new; if (r && r.fecha === S.fecha) { put(r); render(); } }).subscribe(st => { if (st === 'SUBSCRIBED') loadChecks(); });
+    setInterval(loadChecks, 60000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) loadChecks(); });
+    loadChecks(); render();
+  }
+  function put(r) { const id = docId(r.fecha, r.estacion); const c = S.checks[id] || (S.checks[id] = { items: {} }); c.items[r.cod] = { ok: r.ok, by: r.nombre, at: r.at }; }
+  async function loadChecks() {
+    if (!S.db) return; const f = S.fecha;
+    const { data, error } = await S.db.from('checks').select('*').eq('fecha', f);
+    if (f !== S.fecha) return;
+    if (error) { toast('No se pudieron leer los checks. Revisa la conexión.'); return; }
+    S.checks = {}; data.forEach(put); render();
+  }
+  function subChecks() { S.checks = {}; loadChecks(); }
+
+  // ---- acceso abierto (Pablo, 28-oct): sin PIN; el nombre es opcional y se recuerda en este equipo
+  function getNombre() { try { return localStorage.getItem('lafenomenal_nombre') || ''; } catch (e) { return S.nombreMem || ''; } }
+  function setNombre(n) { S.nombreMem = n; try { localStorage.setItem('lafenomenal_nombre', n); } catch (e) {} }
+  function credBar() {
+    const i = el('input', { type: 'text', id: 'quien', placeholder: 'Tu nombre (opcional)', maxlength: '40', autocomplete: 'name', 'aria-label': 'Tu nombre' });
+    i.value = getNombre();
+    i.addEventListener('change', () => { setNombre(i.value.trim()); toast(i.value.trim() ? `Tus checks quedan a nombre de ${i.value.trim()}.` : 'Tus checks quedan sin nombre.'); });
+    return el('label', { class: 'cred', for: 'quien' }, 'Marca:', i);
+  }
+  const writing = {};
+  async function toggle(est, cod, ok) {
+    if (!S.db) return;
+    const nombre = getNombre();
+    put({ fecha: S.fecha, estacion: est, cod, ok, nombre, at: new Date().toISOString() }); render();
+    const k = est + '/' + cod, f = S.fecha;
+    while (writing[k]) await writing[k];
+    const p = (async () => {
+      const { error } = await S.db.rpc('marcar', { p_fecha: f, p_estacion: est, p_cod: cod, p_ok: ok, p_pin: '', p_nombre: nombre });
+      if (error) {
+        toast('No se guardó el check. Revisa la conexión y vuelve a marcarlo.');
+        loadChecks();
+      }
+    })();
+    writing[k] = p; await p; if (writing[k] === p) delete writing[k];
+  }
+  const isOk = (est, cod) => !!(((S.checks[docId(S.fecha, est)] || {}).items || {})[cod] || {}).ok;
+
+  // ---- vistas
+  function render() {
+    main.innerHTML = '';
+    if (S.err) { main.append(el('div', { class: 'notice', text: S.err })); return; }
+    if (!S.loaded) { main.append(el('div', { class: 'notice', text: 'Cargando la lista de stocks del día…' })); return; }
+    if (!Object.keys(S.plan).length) { main.append(el('div', { class: 'notice', text: 'Todavía no hay un plan de stocks cargado. Cuando el administrador lo cargue, cada estación verá aquí su lista del día.' })); return; }
+    if (S.vista === 'selector') return renderSelector();
+    const d = dia(S.fecha);
+    if (S.vista === 'admin') return renderAdmin(d);
+    if (S.vista === 'produccion') return renderProd(d);
+    if (S.vista === 'pedidos') return renderPedidos();
+    return renderEst(S.vista, d);
+  }
+
+  function lunes(d) { if (d !== 'Lunes') return false;
+    main.append(el('div', { class: 'notice', text: 'Lunes: el local está cerrado y no hay personal. No hay stocks ni producción para revisar. Usa ‹ › para ir a otro día.' })); return true; }
+
+  // orden y nombre de los grupos de cada estación (grupo viene en plan.json; producción no lo trae)
+  const GRUPOS = [['prep', 'Las preparas tú'], ['prod', 'Vienen de producción'], ['comprado', 'Comprados (stock referencial)'], ['Bebidas y aguas', 'Bebidas y aguas'], ['Cervezas', 'Cervezas'],
+    ['Vinos y espumantes', 'Vinos y espumantes'], ['Destilados', 'Destilados'], ['Licores y aperitivos', 'Licores y aperitivos'],
+    ['Insumos de coctelería y café', 'Insumos de coctelería y café'], ['ins', 'Insumos']];
+  const grupoDe = r => r.grupo || (r.tipo === 'PRO' ? 'prep' : 'ins');
+  function stationRows(est, d) { const p = S.plan[est]; if (!p) return [];
+    return p.items.map(i => ({ ...i, q: i.stock[d] })).filter(i => i.q != null && Number(i.q) > 0); }
+
+  function renderEst(est, d) {
+    const head = el('section', { class: 'group' },
+      el('h2', { text: EST[est] }), el('p', { class: 'sub', text: `Stock que debe quedar listo en la estación para el ${fmtF(S.fecha)}. Marca cada línea cuando lo tengas.` }),
+      null);
+    main.append(head);
+    if (lunes(d)) return;
+    const rows = stationRows(est, d);
+    const done = rows.filter(r => isOk(est, r.cod)).length;
+    main.append(statusBar(done, rows.length));
+    main.append(credBar());
+    main.append(toolsBar());
+    const q = S.q.toLowerCase();
+    const vis = rows.filter(r => (!q || r.art.toLowerCase().includes(q)) && (!S.soloPend || !isOk(est, r.cod)));
+    GRUPOS.forEach(([t, lab]) => {
+      const g = vis.filter(r => grupoDe(r) === t).sort((a, b) => a.art.localeCompare(b.art, 'es'));
+      if (!g.length) return;
+      main.append(el('section', { class: 'group' }, el('h3', { text: `${lab} · ${g.length}` }),
+        el('div', { class: 'list' }, g.map(r => itemRow(est, r.cod, r.art, r.q, r.un, null)))));
+    });
+    if (!vis.length) main.append(el('div', { class: 'notice', text: S.soloPend && rows.length ? 'Todo marcado. La estación está lista.' : 'Ningún ítem coincide con la búsqueda.' }));
+    main.append(foot());
+  }
+
+  function itemRow(est, cod, art, q, un, meta) {
+    const ok = isOk(est, cod);
+    const cb = el('input', { type: 'checkbox', id: 'c-' + est + '-' + cod, 'aria-label': art });
+    cb.checked = ok; cb.disabled = !S.canWrite;
+    cb.addEventListener('change', () => toggle(est, cod, cb.checked));
+    const mark = (((S.checks[docId(S.fecha, est)] || {}).items || {})[cod]) || null;
+    const who = ok && mark && mark.at ? `✓ ${mark.by || ''} ${new Date(mark.at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}`.replace(/\s+/g, ' ') : null;
+    const fi = (S.fichas || {})[cod];
+    const fq = fi && q > 0 && ((fi.u === 'kg' && un === 'kg') || (fi.u === 'un' && un === 'un')) ? '?c=' + String(Math.round(q * 100) / 100) : '';
+    const flink = fi ? el('a', { class: 'fl', href: '../fichas/' + (fq ? fq + '&de=' + (est === 'produccion' ? 'produccion' : 'estacion') : '?de=' + (est === 'produccion' ? 'produccion' : 'estacion')) + '#' + fi.c, text: 'Ver ficha ›' }) : null;
+    const name = el('span', { class: 'name' }, el('span', { text: art }), (meta || who) ? el('span', { class: 'meta', text: [meta, who].filter(Boolean).join(' · ') }) : null, flink);
+    const row = el('label', { class: 'item' + (ok ? ' done' : ''), for: cb.id }, cb, name,
+      el('span', { class: 'qty' }, cant(q, un)[0], el('small', { text: cant(q, un)[1] })));
+    return row;
+  }
+
+  function statusBar(done, total) {
+    const pctv = total ? Math.round(done / total * 100) : 0;
+    return el('div', { class: 'status' },
+      el('span', { class: 'count', text: `${done} de ${total}` }),
+      el('div', { class: 'meter', role: 'progressbar', 'aria-valuenow': pctv, 'aria-valuemin': 0, 'aria-valuemax': 100 }, (() => { const i = el('i'); i.style.width = pctv + '%'; return i; })()),
+      el('span', { class: 'pill ' + (done === total && total ? 'ok' : 'warn'), text: done === total && total ? 'Lista' : `Faltan ${total - done}` }),
+      S.canWrite ? null : el('span', { class: 'pill warn', text: 'Solo lectura' }));
+  }
+
+  function toolsBar() {
+    const s = el('input', { type: 'search', id: 'buscar', placeholder: 'Buscar insumo', 'aria-label': 'Buscar insumo' }); s.value = S.q;
+    s.addEventListener('input', () => { S.q = s.value; const pos = s.selectionStart; render(); const n = $('#buscar'); if (n) { n.focus(); n.setSelectionRange(pos, pos); } });
+    const cb = el('input', { type: 'checkbox', id: 'solo-pend' }); cb.checked = S.soloPend;
+    cb.addEventListener('change', () => { S.soloPend = cb.checked; render(); });
+    return el('div', { class: 'tools' }, s, el('label', { for: 'solo-pend' }, cb, 'Solo pendientes'));
+  }
+
+  function prodRows(d) { const p = S.plan.produccion; if (!p) return [];
+    return p.items.filter(i => i.reparto && i.reparto[d] != null).map(i => ({ ...i, q: i.reparto[d] })); }
+
+  function renderProd(d) {
+    main.append(el('section', { class: 'group' }, el('h2', { text: 'Producción' }),
+      el('p', { class: 'sub', text: `Preparaciones (PRO) que se producen el ${fmtF(S.fecha)}. Se produce de martes a viernes para llegar con la cocina abastecida al fin de semana: proteínas una vez por semana y empanaditas de a dos variedades por día. Las salsas y bases las prepara cada estación.` }),
+      el('a', { class: 'fichas-btn', href: '../fichas/?de=produccion&g=' + encodeURIComponent('Producción'), text: 'Fichas de Producción' })));
+    if (lunes(d)) return;
+    const rows = prodRows(d);
+    if (!rows.length) main.append(el('div', { class: 'notice', text: `${d}: no hay producción programada. Revisa que los stocks de cada estación estén completos y anota lo que falte para el martes.` }));
+    else {
+      const done = rows.filter(r => isOk('produccion', r.cod)).length;
+      const hrs = rows.reduce((a, r) => a + (Number(r.horas) || 0) / Object.keys(r.reparto).length, 0);
+      main.append(statusBar(done, rows.length));
+      main.append(credBar());
+      main.append(el('p', { class: 'sub', text: `Carga estimada del día: ${hrs.toLocaleString('es-CL', { maximumFractionDigits: 1 })} horas de trabajo, según los tiempos del cronograma de producción.` }));
+      [['Proteínas', 'Proteínas'], ['Producción y Armado', 'Empanaditas']].forEach(([cat, lab]) => {
+        const g = rows.filter(r => r.categoria === cat); if (!g.length) return;
+        main.append(el('section', { class: 'group' }, el('h3', { text: `${lab} · ${g.length}` }),
+          el('div', { class: 'list' }, g.map(r => itemRow('produccion', r.cod, r.art, r.q, r.un,
+            `${r.frecuencia}${r.horas ? ' · ' + String(r.horas).replace('.', ',') + ' h' : ''} · va a ${r.estacion}`)))));
+      });
+    }
+    // programa semanal completo
+    const all = (S.plan.produccion || {}).items || [];
+    const cols = ['Martes', 'Miércoles', 'Jueves', 'Viernes'];
+    const tb = el('tbody');
+    all.forEach(i => tb.append(el('tr', null, el('td', { text: i.art }), el('td', { text: cantTxt(i.semanal, i.un) }),
+      cols.map(c => el('td', { class: c === d ? 'today' : '', text: i.reparto[c] != null ? (enG(i.reparto[c], i.un) ? cantTxt(i.reparto[c], i.un) : qty(i.reparto[c], i.un)) : '' })))));
+    const tot = cols.map(c => all.filter(i => i.reparto[c] != null).reduce((a, i) => a + (Number(i.horas) || 0) / Object.keys(i.reparto).length, 0));
+    main.append(el('section', { class: 'group' }, el('h3', { text: 'Programa semanal' }),
+      el('div', { class: 'week' }, el('table', null,
+        el('thead', null, el('tr', null, el('th', { text: 'Preparación' }), el('th', { text: 'Semana' }), cols.map(c => el('th', { class: c === d ? 'today' : '', text: c.slice(0, 3) })))),
+        tb,
+        el('tfoot', null, el('tr', null, el('td', { text: 'Horas estimadas' }), el('td'), tot.map((h, k) => el('td', { class: cols[k] === d ? 'today' : '', text: h.toLocaleString('es-CL', { maximumFractionDigits: 1 }) }))))))));
+    main.append(foot());
+  }
+
+  function renderAdmin(d) {
+    main.append(el('section', { class: 'group' }, el('h2', { text: 'Resumen del día' }),
+      el('p', { class: 'sub', text: `Avance de cada estación para el ${fmtF(S.fecha)}. Se actualiza solo a medida que el equipo marca sus listas.` })));
+    if (lunes(d)) return;
+    const cards = el('div', { class: 'cards' });
+    const all = [...Object.keys(EST)];
+    all.forEach(est => {
+      const rows = est === 'produccion' ? prodRows(d) : stationRows(est, d);
+      const done = rows.filter(r => isOk(est, r.cod));
+      const pend = rows.filter(r => !isOk(est, r.cod));
+      const marks = Object.values(((S.checks[docId(S.fecha, est)] || {}).items) || {}).filter(m => m.ok && m.at).sort((a, b) => b.at.localeCompare(a.at));
+      const last = marks[0];
+      const pctv = rows.length ? Math.round(done.length / rows.length * 100) : 0;
+      const meter = el('div', { class: 'meter' }); const bar = el('i'); bar.style.width = pctv + '%'; meter.append(bar);
+      const c = el('article', { class: 'card' },
+        el('header', null, el('h4', { text: est === 'produccion' ? 'Producción' : EST[est] }), el('a', { href: '#' + est, text: 'Abrir' })),
+        rows.length ? el('div', { class: 'status' }, el('span', { class: 'count', text: `${done.length}/${rows.length}` }), meter,
+          el('span', { class: 'pill ' + (pend.length ? 'warn' : 'ok'), text: pend.length ? `Faltan ${pend.length}` : 'Lista' }))
+          : el('p', { class: 'who', text: 'Sin producción programada este día.' }),
+        last ? el('p', { class: 'who', text: `Último check: ${last.by || 'alguien'}, ${new Date(last.at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}` })
+          : rows.length ? el('p', { class: 'who', text: 'Nadie ha marcado todavía.' }) : null,
+        rows.length ? checkList(est, rows) : null);
+      cards.append(c);
+    });
+    const cb = el('input', { type: 'checkbox', id: 'solo-pend' }); cb.checked = S.soloPend;
+    cb.addEventListener('change', () => { S.soloPend = cb.checked; render(); });
+    main.append(el('div', { class: 'tools' }, el('label', { for: 'solo-pend' }, cb, 'Ver solo pendientes')));
+    main.append(cards);
+    main.append(foot());
+  }
+
+  // lista de solo lectura para admin: cada ítem con su ✓ tal como lo dejó la estación, en el mismo orden que la ve el equipo
+  function checkList(est, rows) {
+    const marks = ((S.checks[docId(S.fecha, est)] || {}).items) || {};
+    const orden = Object.fromEntries(GRUPOS.map(([t], k) => [t, k]));
+    const vis = rows.filter(r => !S.soloPend || !isOk(est, r.cod))
+      .sort((a, b) => (orden[grupoDe(a)] ?? 99) - (orden[grupoDe(b)] ?? 99) || a.art.localeCompare(b.art, 'es'));
+    if (!vis.length) return el('p', { class: 'who', text: 'Todo marcado.' });
+    return el('ul', { class: 'chk', 'aria-label': 'Checklist de la estación' }, vis.map(r => {
+      const m = marks[r.cod], ok = !!(m && m.ok);
+      const who = ok && m.at ? `${m.by || ''} ${new Date(m.at).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}`.trim() : '';
+      return el('li', { class: ok ? 'done' : '' },
+        el('span', { class: 'tick', 'aria-label': ok ? 'Marcado' : 'Pendiente', text: ok ? '✓' : '' }),
+        el('span', { class: 'name' }, el('span', { text: r.art }), who ? el('span', { class: 'meta', text: who }) : null),
+        el('span', { class: 'q', text: cantTxt(r.q, r.un) }));
+    }));
+  }
+
+  // ---- pedidos por familia: sugerido (venta S3 + producción, +20%) y una cantidad propia que es la que se copia.
+  // La cantidad propia se guarda en este equipo, por semana.
+  const altKey = (x, i) => ['ped', martesDeSemana(), x.nombre, x.dia, i.cod].join('|');
+  function getAlt(x, i) { try { return localStorage.getItem(altKey(x, i)) || ''; } catch (e) { return (S.altMem || {})[altKey(x, i)] || ''; } }
+  function setAlt(x, i, v) { S.altMem = S.altMem || {}; S.altMem[altKey(x, i)] = v; try { v ? localStorage.setItem(altKey(x, i), v) : localStorage.removeItem(altKey(x, i)); } catch (e) {} }
+  function famBotones(fams) {
+    const box = $('#fams'); box.innerHTML = '';
+    fams.forEach(f => { const b = el('button', { type: 'button', text: f, 'aria-pressed': String(f === S.fam) });
+      b.addEventListener('click', () => { S.fam = f; $('#dianom').textContent = f; render(); }); box.append(b); });
+  }
+  const SEMANA7 = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  const hoyNom = () => SEMANA7[(new Date().getDay() + 6) % 7];
+  const pedirDia = x => x.pedir_dia || SEMANA7[(SEMANA7.indexOf(x.dia) + 6) % 7];
+  const pedirHora = x => x.pedir_hora || '15:00';
+  const lista = a => a.length > 1 ? a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1] : a.join('');
+  function avisoHoy(P) {
+    const hoy = hoyNom(), hoyP = P.pedidos.filter(x => pedirDia(x) === hoy);
+    const dias = [...new Set(P.pedidos.map(pedirDia))].sort((a, b) => SEMANA7.indexOf(a) - SEMANA7.indexOf(b));
+    if (hoyP.length) {
+      const [hh, mm] = pedirHora(hoyP[0]).split(':').map(Number), lim = new Date(); lim.setHours(hh, mm, 0, 0);
+      const falta = Math.round((lim - new Date()) / 60000);
+      const tiempo = falta > 0 ? ` Faltan ${Math.floor(falta / 60) ? Math.floor(falta / 60) + ' h ' : ''}${falta % 60} min.` : ' La hora de hoy ya pasó: pídelo igual y avisa al proveedor.';
+      return el('div', { class: 'avisoped' + (falta > 0 ? '' : ' ya') }, el('b', { text: `Hoy ${hoy.toLowerCase()} se pide antes de las ${pedirHora(hoyP[0])}: ` }), lista([...new Set(hoyP.map(x => x.nombre))]) + '.' + tiempo);
+    }
+    const sig = dias.find(d => SEMANA7.indexOf(d) > SEMANA7.indexOf(hoy)) || dias[0], sp = P.pedidos.filter(x => pedirDia(x) === sig);
+    return el('div', { class: 'avisoped ya' }, el('b', { text: 'Hoy no hay pedidos. ' }), `Próximo: el ${sig.toLowerCase()} antes de las ${pedirHora(sp[0])} (${lista([...new Set(sp.map(x => x.nombre))])}).`);
+  }
+  function renderPedidos() {
+    const P = S.pedidos;
+    if (!P) { main.append(el('div', { class: 'notice', text: 'No se pudo cargar la lista de pedidos. Recarga la página.' })); return; }
+    main.append(avisoHoy(P));
+    const fams = [...new Set(P.pedidos.map(x => x.nombre))];
+    if (!fams.includes(S.fam)) S.fam = fams[0];
+    famBotones(fams); $('#dianom').textContent = S.fam;
+    const lst = P.pedidos.filter(x => x.nombre === S.fam);
+    main.append(el('section', { class: 'group' }, el('h2', { text: S.fam }),
+      el('p', { class: 'sub', text: `${lst.length === 1 ? 'Un pedido' : lst.length + ' pedidos'} por semana: se pide ${lista(lst.map(x => pedirDia(x).toLowerCase()))} (antes de las ${pedirHora(lst[0])}) y llega ${lista(lst.map(x => x.dia.toLowerCase()))}. Sugerido = venta de la semana 20-25 oct + materia prima de la producción, + 20% (no descuenta bodega). Escribe en "Pedir" otra cantidad si quieres; es la que se copia.` })));
+    lst.forEach(x => main.append(pedidoCard(x)));
+    main.append(el('p', { class: 'foot', text: 'Siempre se pide el día anterior, antes de las 15:00. Vegetales y panes llegan martes, jueves y sábado. Carnes y pescados frescos: martes y jueves. Congelados (camarones, ostiones, jaiba), lácteos y abarrotes: martes, para toda la semana. Barra: jueves, para toda la semana. Postres comprados (crema volteada, tiramisú): martes y viernes. La columna Proveedor es la que administración fue completando; "Sin proveedor asignado" = todavía no está definido.' }));
+  }
+  // Los proveedores los agrega administración a mano (se asocian a insumos): nombre corto, sin repetir.
+  async function nuevoProveedor() {
+    const t = (window.prompt('Nombre corto del proveedor nuevo (ej. Ancavil, Bidfood):') || '').trim().replace(/\s+/g, ' ');
+    if (!t) return null;
+    if (t.length > 24) { toast('Usa un nombre más corto (máximo 24 letras).'); return null; }
+    const ya = (S.lista || []).find(c => c.toLowerCase() === t.toLowerCase());
+    if (ya) { toast(ya + ' ya está en la lista.'); return ya; }
+    const r = await S.db.from('proveedores_lista').insert({ corto: t, orden: (S.lista || []).length + 100 });
+    if (r.error) { toast('No se pudo agregar el proveedor.'); return null; }
+    S.lista.push(t);
+    document.querySelectorAll('select.provsel').forEach(o => o.insertBefore(el('option', { value: t, text: t }), o.lastElementChild));
+    toast('Proveedor agregado: ' + t);
+    return t;
+  }
+  function provCelda(i) {
+    const cur = (S.provs || {})[i.cod] || '';
+    if (!S.admin) return el('td', { class: 'prov' + (cur ? '' : ' sin'), text: cur || 'Sin proveedor asignado' });
+    const sel = el('select', { class: 'provsel' + (cur ? '' : ' sin'), 'data-cod': i.cod, 'aria-label': 'Proveedor de ' + i.art });
+    sel.append(el('option', { value: '', text: 'Sin proveedor asignado' }));
+    (S.lista || []).forEach(c => sel.append(el('option', { value: c, text: c })));
+    sel.append(el('option', { value: '__nuevo__', text: '+ Nuevo proveedor…' }));
+    sel.value = cur;
+    sel.addEventListener('change', async () => {
+      const antes = (S.provs || {})[i.cod] || '';
+      if (sel.value === '__nuevo__') { sel.value = antes; const nuevo = await nuevoProveedor(); if (!nuevo) return; sel.value = nuevo; }
+      const v = sel.value;
+      const r = v ? await S.db.from('pedido_proveedor').upsert({ insumo_cod: i.cod, proveedor: v, origen: 'manual', actualizado_en: new Date().toISOString() })
+                  : await S.db.from('pedido_proveedor').delete().eq('insumo_cod', i.cod);
+      if (r.error) { sel.value = antes; toast('No se pudo guardar el proveedor. Revisa tu conexión.'); return; }
+      S.provs = S.provs || {}; if (v) S.provs[i.cod] = v; else delete S.provs[i.cod];
+      document.querySelectorAll('select.provsel[data-cod="' + i.cod + '"]').forEach(o => { o.value = v; o.classList.toggle('sin', !v); });
+      toast(v ? i.art + ': ' + v : i.art + ': sin proveedor');
+    });
+    return el('td', { class: 'prov' }, sel);
+  }
+  function filaItem(x, i) {
+    const g = enG(i.cant, i.un);
+    const inp = el('input', { type: 'number', min: '0', step: g ? '50' : (i.un === 'kg' || i.un === 'lt') ? '0.1' : '1', inputmode: 'decimal', class: 'alt', 'aria-label': `Pedir ${i.art} (${g ? 'g' : (UN[i.un] || i.un)})`, placeholder: cant(i.cant, i.un)[0] });
+    inp.value = getAlt(x, i);
+    inp.addEventListener('input', () => setAlt(x, i, inp.value.trim()));
+    return el('tr', null, el('td', { class: 'pn', text: i.art }), provCelda(i), el('td', { class: 'sug', text: cantTxt(i.cant, i.un) }), el('td', null, inp));
+  }
+  function pedidoCard(x) {
+    const tb = el('tbody'); let fam = null;
+    x.items.forEach(i => {
+      if (x.nombre === 'Barra' && i.grupo !== fam) { fam = i.grupo; tb.append(el('tr', null, el('td', { class: 'fam', colspan: 4, text: fam }))); }
+      tb.append(filaItem(x, i));
+    });
+    const texto = () => {
+      const g = {};
+      x.items.forEach(i => { const a = getAlt(x, i); const n = a !== '' ? Number(a) / (enG(i.cant, i.un) ? 1000 : 1) : i.cant;
+        if (n > 0) { const k = (S.provs || {})[i.cod] || 'Sin proveedor asignado'; (g[k] = g[k] || []).push(`- ${i.art}: ${cantTxt(n, i.un)}`); } });
+      const ks = Object.keys(g).sort((p, q) => (p === 'Sin proveedor asignado') - (q === 'Sin proveedor asignado') || p.localeCompare(q, 'es'));
+      return `Pedido ${x.nombre} · se pide el ${pedirDia(x).toLowerCase()} · llega el ${x.dia.toLowerCase()}\n\n` + ks.map(k => k + ':\n' + g[k].join('\n')).join('\n\n');
+    };
+    const copiar = el('button', { type: 'button', class: 'btn pri', text: 'Copiar lista' });
+    copiar.addEventListener('click', async () => { try { await navigator.clipboard.writeText(texto()); toast('Lista copiada, ordenada por proveedor. Pégala en WhatsApp o en el correo.'); } catch (e) { toast('No se pudo copiar en este navegador.'); } });
+    const limpiar = el('button', { type: 'button', class: 'btn', text: 'Volver al sugerido' });
+    limpiar.addEventListener('click', () => { x.items.forEach(i => setAlt(x, i, '')); render(); });
+    return el('article', { class: 'ped' },
+      el('header', null, el('h4', { text: 'Llega el ' + x.dia.toLowerCase() }), el('span', { class: 'pill warn pedir', text: `Pedir el ${pedirDia(x).toLowerCase()} antes de las ${pedirHora(x)}` }), el('span', { class: 'cubre', text: 'Cubre ' + x.cubre.map(c => c.slice(0, 3).toLowerCase()).join(', ') + ' · ' + x.items.length + ' productos' })),
+      x.nota ? el('p', { class: 'pill warn', style: 'border-radius:8px;padding:8px 10px;font-weight:500;line-height:1.4', text: x.nota }) : null,
+      el('table', null, el('thead', null, el('tr', null, el('th', { text: 'Producto' }), el('th', { class: 'pv', text: 'Proveedor' }), el('th', { class: 'sug', text: 'Sugerido' }), el('th', { text: 'Pedir' }))), tb),
+      el('div', { class: 'acts' }, copiar, limpiar));
+  }
+
+  function renderSelector() {
+    main.append(el('section', { class: 'group' }, el('h2', { text: '¿Dónde trabajas hoy?' }),
+      el('p', { class: 'sub', text: 'Elige tu estación. Este equipo la recuerda y la próxima vez entra directo.' })));
+    const g = el('div', { class: 'selector' });
+    Object.entries(VISTAS).forEach(([v, [nom, desc]]) => {
+      const b = el('button', { type: 'button' }, el('b', { text: nom }), el('span', { text: desc }));
+      const entrar = () => { setModo(v); location.hash = v; readHash(); };
+      b.addEventListener('click', entrar);
+      g.append(b);
+    });
+    main.append(g);
+  }
+
+  function foot() {
+    const m = S.meta;
+    return el('p', { class: 'foot', text: (m && m.nota ? m.nota + ' ' : '') + 'Los lunes no se trabaja. Si una cantidad no calza con la realidad, avísale al administrador para ajustarla.' });
+  }
+
+  boot();
+})();
+
+</script>
+</body>
+</html>

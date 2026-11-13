@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex">
+<meta name="theme-color" content="#092566">
+<title>Inicio</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@500;600&family=Libre+Franklin:wght@400;500;600;700&display=swap">
+<style>
+:root{--fondo:#F4F6FA;--panel:#FFFFFF;--ink:#1b212e;--muted:#686f80;--rule:#D6DCE8;--acc:#0D338E;--accfg:#F4F6FA;--prof:#092566}
+@media(prefers-color-scheme:dark){:root{--fondo:#131722;--panel:#1b212e;--ink:#ebeef5;--muted:#a1a8b8;--rule:#32394a;--acc:#9cb6f2;--accfg:#131722;--prof:#0a1d4d}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--fondo);color:var(--ink);font:16px/1.45 'Libre Franklin',system-ui,sans-serif}
+main{max-width:44rem;margin:0 auto;padding:20px 16px 24px;display:grid;gap:20px}
+.hola{font:600 1.9rem/1.1 'EB Garamond',Georgia,serif;margin:0}
+.fecha{color:var(--muted);margin:2px 0 0;text-transform:capitalize}
+.hoy{display:flex;align-items:center;gap:14px;padding:18px;border-radius:18px;background:var(--prof);color:#F4F6FA;text-decoration:none;box-shadow:0 6px 18px rgba(0,0,0,.18)}
+@media(prefers-color-scheme:dark){.hoy{color:#ebeef5}.hoy.c{color:#ebeef5}}
+.hoy.c{background:var(--panel);color:var(--ink);border:1px solid var(--rule);box-shadow:none}
+.hoy.c .go{background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.hoy.c b{font-size:1.2rem}
+.hoy small{display:block;opacity:.75;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase}
+.hoy b{display:block;font:600 1.5rem/1.15 'EB Garamond',Georgia,serif;margin-top:2px}
+.hoy .go{margin-left:auto;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
+.hoy .go svg{transform:rotate(180deg)}
+h2{font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin:0 0 10px;font-weight:600}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+.card{display:grid;gap:10px;align-content:start;padding:16px;min-height:9.5rem;background:var(--panel);border:1px solid var(--rule);border-radius:16px;text-decoration:none;color:var(--ink);transition:transform .12s,border-color .12s}
+.card:active{transform:scale(.98)} .card:hover{border-color:var(--acc)}
+.card:focus-visible,.hoy:focus-visible{outline:2px solid var(--acc);outline-offset:3px}
+.card .ic{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:color-mix(in srgb,var(--acc) 14%,transparent);color:var(--acc)}
+.card b{font:600 1.15rem 'EB Garamond',Georgia,serif}
+.card span.d{color:var(--muted);font-size:.84rem;line-height:1.35}
+.card.adm::after{content:"Administración";justify-self:start;font-size:.68rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);border:1px solid var(--rule);border-radius:99px;padding:2px 8px}
+@media(min-width:700px){.cards{grid-template-columns:repeat(3,1fr)}}
+</style></head>
+<body data-seccion="inicio">
+<main>
+  <header><h1 class="hola" id="hola">Hola</h1><p class="fecha" id="fecha"></p></header>
+  <a class="hoy" id="hoy" href="estaciones/"><div><small>Hoy</small><b id="hoyd">Checklist por estación</b></div><span class="go" id="go"></span></a>
+  <a class="hoy c" id="hoyc" href="estaciones/#pedidos" hidden><div><small>Compras</small><b id="hoycd"></b></div><span class="go" id="goc"></span></a>
+  <section><h2>Secciones</h2><div class="cards" id="cards"></div></section>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="marca.js"></script>
+<script src="acceso.js"></script>
+<script src="shell.js"></script>
+<script>
+const M=window.MARCA,h=new Date().getHours();
+document.title=M.nombre;
+document.getElementById('hola').textContent=(h<12?'Buenos días':h<20?'Buenas tardes':'Buenas noches');
+const d=new Date();document.getElementById('fecha').textContent=d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long'});
+document.getElementById('go').innerHTML=shellIcono('atras');
+const DIA=d.toLocaleDateString('es-CL',{weekday:'long'});
+document.getElementById('hoyd').textContent=DIA==='lunes'?'Checklist por estación (lunes sin producción)':'Checklist por estación del '+DIA;
+function pinta(admin){
+  document.getElementById('cards').innerHTML=M.secciones.filter(s=>admin||!s.admin).map(s=>
+   `<a class="card${s.admin?' adm':''}" href="${s.ruta}"><span class="ic">${shellIcono(s.icono)}</span><b>${s.titulo}</b><span class="d">${s.desc||''}</span></a>`).join('');
+}
+pinta(false);
+acceso.cliente().then(()=>acceso.esAdmin()).then(pinta);
+// Compras: qué hay que pedir hoy (el día anterior a la llegada, antes de las 15:00)
+(async()=>{try{
+  const P=JSON.parse(await acceso.archivo('estaciones/pedidos.json')),S7=['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
+  const hoy=S7[(new Date().getDay()+6)%7],pd=x=>x.pedir_dia||S7[(S7.indexOf(x.dia)+6)%7];
+  const lst=a=>a.length>1?a.slice(0,-1).join(', ')+' y '+a[a.length-1]:a.join('');
+  const dias=[...new Set(P.pedidos.map(pd))].sort((a,b)=>S7.indexOf(a)-S7.indexOf(b));
+  const h=P.pedidos.filter(x=>pd(x)===hoy),el=document.getElementById('hoycd');
+  if(h.length){el.textContent='Hoy se pide antes de las 15:00: '+lst([...new Set(h.map(x=>x.nombre))]);}
+  else{const sg=dias.find(d=>S7.indexOf(d)>S7.indexOf(hoy))||dias[0],sp=P.pedidos.filter(x=>pd(x)===sg);el.textContent='Próximo pedido: '+sg.toLowerCase()+' antes de las 15:00 ('+lst([...new Set(sp.map(x=>x.nombre))])+')';}
+  document.getElementById('goc').innerHTML=shellIcono('atras');document.getElementById('goc').firstChild.style.transform='rotate(180deg)';
+  document.getElementById('hoyc').hidden=false;
+}catch(e){}})();
+</script></body></html>
