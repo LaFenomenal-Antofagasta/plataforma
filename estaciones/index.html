@@ -224,10 +224,9 @@ td small.prov { display: block; color: var(--muted); font-size: .74rem; margin-t
   $('#cambiar').addEventListener('click', e => { e.preventDefault(); setModo(null); history.replaceState(null, '', location.pathname); readHash(); });
   // semana de trabajo martes-domingo que contiene hoy (el lunes ya muestra la semana que empieza mañana).
   // Los checks se guardan con la fecha real, así cada semana parte en blanco.
-  const SEMANA = ['Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
-  function martesDeSemana() { const h = hoyISO(), w = new Date(h + 'T12:00:00').getDay(); return shift(h, w === 1 ? 1 : w === 0 ? -5 : 2 - w); }
+  const SEMANA = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+  function martesDeSemana() { const h = hoyISO(), w = new Date(h + 'T12:00:00').getDay(); return shift(h, w === 0 ? -6 : 1 - w); }
   const fechaDe = d => shift(martesDeSemana(), SEMANA.indexOf(d));
-  if (dia(S.fecha) === 'Lunes') S.fecha = martesDeSemana();
   SEMANA.forEach(d => { const b = el('button', { type: 'button', 'data-d': d, text: d.slice(0, 3) }); b.addEventListener('click', () => setFecha(fechaDe(d))); $('#dias').append(b); });
   function setFecha(f) { S.fecha = f; diaNom(); subChecks(); render(); }
   function diaNom() { if (S.vista !== 'pedidos') $('#dianom').textContent = dia(S.fecha); document.querySelectorAll('#dias button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.d === dia(S.fecha)))); }
@@ -304,11 +303,11 @@ td small.prov { display: block; color: var(--muted); font-size: .74rem; margin-t
     return renderEst(S.vista, d);
   }
 
-  function lunes(d) { if (d !== 'Lunes') return false;
+  function lunes(d) { return false;
     main.append(el('div', { class: 'notice', text: 'Lunes: el local está cerrado y no hay personal. No hay stocks ni producción para revisar. Usa ‹ › para ir a otro día.' })); return true; }
 
   // orden y nombre de los grupos de cada estación (grupo viene en plan.json; producción no lo trae)
-  const GRUPOS = [['prep', 'Las preparas tú'], ['prod', 'Vienen de producción'], ['comprado', 'Comprados (stock referencial)'], ['Bebidas y aguas', 'Bebidas y aguas'], ['Cervezas', 'Cervezas'],
+  const GRUPOS = [['prep', 'Las preparas tú'], ['prod', 'Vienen de producción'], ['freezer', 'Freezer: pastas congeladas'], ['comprado', 'Comprados (stock referencial)'], ['Bebidas y aguas', 'Bebidas y aguas'], ['Cervezas', 'Cervezas'],
     ['Vinos y espumantes', 'Vinos y espumantes'], ['Destilados', 'Destilados'], ['Licores y aperitivos', 'Licores y aperitivos'],
     ['Insumos de coctelería y café', 'Insumos de coctelería y café'], ['ins', 'Insumos']];
   const grupoDe = r => r.grupo || (r.tipo === 'PRO' ? 'prep' : 'ins');
@@ -578,7 +577,7 @@ td small.prov { display: block; color: var(--muted); font-size: .74rem; margin-t
 
   function foot() {
     const m = S.meta;
-    return el('p', { class: 'foot', text: (m && m.nota ? m.nota + ' ' : '') + 'Los lunes no se trabaja. Si una cantidad no calza con la realidad, avísale al administrador para ajustarla.' });
+    return el('p', { class: 'foot', text: (m && m.nota ? m.nota + ' ' : '') + 'Si una cantidad no calza con la realidad, avísale al administrador para ajustarla.' });
   }
 
   boot();
