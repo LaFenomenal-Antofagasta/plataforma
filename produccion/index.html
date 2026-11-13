@@ -60,6 +60,27 @@ details.extra { margin-top: 18px; background: var(--panel); border: 1px solid va
 details.extra summary { cursor: pointer; font-weight: 600; min-height: 36px; display: flex; align-items: center; }
 details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 1px solid var(--rule); background: var(--panel); color: var(--ink); min-height: 44px; max-width: 100%; }
 .toast { position: fixed; left: 50%; bottom: 78px; transform: translateX(-50%); background: var(--navy-deep); color: var(--band-fg); padding: 10px 16px; border-radius: 10px; z-index: 50; }
+.vista { margin-left: auto; display: flex; gap: 0; }
+.vista button { border-radius: 0; min-width: 76px; }
+.vista button:first-child { border-radius: 999px 0 0 999px; } .vista button:last-child { border-radius: 0 999px 999px 0; }
+.vista button[aria-pressed="true"] { background: var(--band-fg); color: var(--navy-deep); font-weight: 600; }
+.gridwrap { overflow: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--panel); max-height: 72vh; }
+table.grid { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 640px; font-size: .9rem; }
+table.grid th, table.grid td { padding: 7px 8px; border-bottom: 1px solid var(--rule); text-align: center; white-space: nowrap; }
+table.grid thead th { position: sticky; top: 0; background: var(--panel); z-index: 2; font-weight: 600; }
+table.grid th.prod, table.grid td.prod { position: sticky; left: 0; background: var(--panel); text-align: left; z-index: 1; min-width: 150px; max-width: 210px; white-space: normal; border-right: 1px solid var(--rule); font-weight: 500; }
+table.grid thead th.prod { z-index: 3; }
+table.grid th.hoy { color: var(--gold); }
+table.grid tr.grp td { background: var(--cream); font-family: var(--display); font-size: 1.05rem; text-align: left; position: sticky; left: 0; font-weight: 600; }
+table.grid td.c { cursor: pointer; min-width: 52px; }
+table.grid td.c.pl { color: var(--ink); }
+table.grid td.c.atras { color: var(--warn); font-style: italic; box-shadow: inset 0 0 0 1.5px var(--warn); border-radius: 6px; }
+table.grid td.c.hecho { background: var(--warn-bg); color: var(--warn); font-weight: 600; }
+table.grid td.c.dig { background: var(--ok-bg); color: var(--ok); font-weight: 600; }
+table.grid td.c.vac { color: var(--rule); cursor: default; }
+table.grid td.tot { color: var(--muted); font-size: .85rem; }
+.leyenda { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; font-size: .85rem; }
+.leyenda span { border-radius: 6px; padding: 2px 8px; }
 </style></head>
 <body data-seccion="produccion">
 <div class="band"><div class="band-in">
@@ -69,6 +90,7 @@ details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 
     <span class="dianom" id="dianom" aria-live="polite"></span>
     <button id="manana" aria-label="Día siguiente">›</button>
     <button id="hoy">Hoy</button>
+    <span class="vista" role="group" aria-label="Vista"><button id="vdia">Día</button><button id="vsem">Semana</button></span>
   </div>
   <nav class="tabs" id="tabs" aria-label="Estaciones"></nav>
 </div></div>
@@ -86,10 +108,11 @@ details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 
   const $ = s => document.querySelector(s);
   const main = $('#main');
   const H = location.hash.slice(1);
-  const S = { fecha: hoyISO(), tab: ['bolleria', 'panaderia', 'cocina', 'barra', 'digitar'].includes(H) ? H : 'todas', plan: [], dia: {}, pend: [], extra: [], db: null, admin: false, err: null };
+  const S = { fecha: hoyISO(), tab: ['bolleria', 'panaderia', 'cocina', 'barra', 'digitar'].includes(H) ? H : 'todas', vista: 'dia', plan: [], planAll: null, semDia: {}, dia: {}, pend: [], extra: [], db: null, admin: false, err: null };
 
   function hoyISO() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 10); }
   function shift(f, n) { const d = new Date(f + 'T12:00:00'); d.setDate(d.getDate() + n); return d.toISOString().slice(0, 10); }
+  function lunes(f) { return shift(f, -(iso(f) - 1)); }
   function iso(f) { const g = new Date(f + 'T12:00:00').getDay(); return g === 0 ? 7 : g; }
   function fmt(f) { const d = new Date(f + 'T12:00:00'); return DIAS[d.getDay()] + ' ' + d.getDate() + '/' + (d.getMonth() + 1); }
   function hora(t) { return t ? new Date(t).toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' }) : ''; }
@@ -109,8 +132,17 @@ details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 
         S.db.from('produccion_dia').select('*').not('hecho_cant', 'is', null).eq('digitado', false).order('fecha').order('nombre')]);
       for (const r of [p, d, pe]) if (r.error) throw r.error;
       S.plan = p.data; S.dia = {}; d.data.forEach(r => S.dia[r.cod] = r); S.pend = pe.data; S.err = null;
-      const t = await S.db.from('produccion_plan').select('cod,nombre,estacion,unidad').order('nombre');
-      const vistos = new Set(); S.extra = (t.data || []).filter(r => !vistos.has(r.cod) && vistos.add(r.cod));
+      if (!S.planAll) {  // el plan completo (todos los días), paginado: Supabase corta en 1.000 filas por consulta
+        let all = [], desde = 0;
+        for (;;) { const a = await S.db.from('produccion_plan').select('*').order('nombre').order('dia').range(desde, desde + 999); if (a.error) throw a.error; all = all.concat(a.data); if (a.data.length < 1000) break; desde += 1000; }
+        S.planAll = all;
+        const vistos = new Set(); S.extra = all.filter(r => !vistos.has(r.cod) && vistos.add(r.cod));
+      }
+      if (S.vista === 'semana') {
+        const ini = lunes(S.fecha), fin = shift(ini, 6);
+        const w = await S.db.from('produccion_dia').select('*').gte('fecha', ini).lte('fecha', fin).range(0, 999);
+        if (w.error) throw w.error; S.semDia = {}; w.data.forEach(r => S.semDia[r.cod + '|' + r.fecha] = r);
+      }
     } catch (e) { S.err = e.message || String(e); }
     render();
   }
@@ -164,6 +196,37 @@ details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 
       el('div', { class: 'ctl' }, sel, q, el('button', { class: 'p', text: 'Anotar', onclick: () => { const r = S.extra.find(x => x.cod === sel.value); if (!r) { toast('Elige un producto.'); return; } marcarHecho({ cod: r.cod, nombre: r.nombre, estacion: r.estacion, unidad: r.unidad, cantidad: null }, q.value); } }))));
   }
 
+  const ORDEN_EST = ['bolleria', 'panaderia', 'cocina', 'barra'];
+  function renderSemana() {
+    const ini = lunes(S.fecha), hoy = hoyISO(); const dias = [0, 1, 2, 3, 4, 5, 6].map(i => shift(ini, i));
+    const pl = {}, prods = {};
+    S.planAll.forEach(r => { pl[r.cod + '|' + r.dia] = r; if (!prods[r.cod]) prods[r.cod] = { cod: r.cod, nombre: r.nombre, estacion: r.estacion, unidad: r.unidad }; });
+    Object.values(S.semDia).forEach(h => { if (!prods[h.cod]) prods[h.cod] = { cod: h.cod, nombre: h.nombre, estacion: h.estacion, unidad: h.unidad }; });
+    const lista = Object.values(prods).filter(r => S.tab === 'todas' || r.estacion === S.tab)
+      .sort((a, b) => (ORDEN_EST.indexOf(a.estacion) - ORDEN_EST.indexOf(b.estacion)) || a.nombre.localeCompare(b.nombre, 'es'));
+    main.append(el('p', { class: 'sub', text: 'Vista de la semana: cada fila es un producto y cada columna un día. Toca una celda para abrir ese día y marcarlo.' }));
+    main.append(el('div', { class: 'leyenda' }, el('span', { class: 'chip g', text: 'Plan (pendiente)' }), el('span', { class: 'chip w', text: 'Armado, falta digitar en Restô' }), el('span', { class: 'chip o', text: 'Armado y digitado' }), el('span', { class: 'chip w', style: 'font-style:italic;box-shadow:inset 0 0 0 1.5px var(--warn);background:transparent', text: 'Plan de un día pasado sin armar' })));
+    if (!lista.length) { main.append(el('div', { class: 'notice', text: 'No hay productos en esta estación.' })); return; }
+    const thead = el('thead', null, el('tr', null, el('th', { class: 'prod', text: 'Producto' }), dias.map(d => { const dt = new Date(d + 'T12:00:00'); return el('th', { class: d === hoy ? 'hoy' : '', text: DIAS[dt.getDay()].slice(0, 3) + ' ' + dt.getDate() }); }), el('th', { text: 'Plan sem.' })));
+    const tb = el('tbody'); let grupo = null;
+    lista.forEach(r => {
+      if (S.tab === 'todas' && r.estacion !== grupo) { grupo = r.estacion; tb.append(el('tr', { class: 'grp' }, el('td', { colspan: '9', text: EST[grupo] || grupo || '' }))); }
+      let tot = 0, nd = 0;
+      const celdas = dias.map(d => {
+        const p = pl[r.cod + '|' + iso(d)], h = S.semDia[r.cod + '|' + d]; const hecho = h && h.hecho_cant != null;
+        if (p && p.cantidad != null) { tot += Number(p.cantidad); nd++; }
+        let cls = 'c vac', txt = '·', tit = '';
+        if (hecho) { cls = 'c ' + (h.digitado ? 'dig' : 'hecho'); txt = num(h.hecho_cant); tit = `Armado ${num(h.hecho_cant)}${p && p.cantidad != null ? ' (plan ' + num(p.cantidad) + ')' : ''} · ${h.hecho_por || ''}`; }
+        else if (p && p.cantidad != null) { cls = 'c ' + (d < hoy ? 'atras' : 'pl'); txt = num(p.cantidad); tit = 'Plan ' + num(p.cantidad); }
+        const td = el('td', { class: cls, text: txt, title: tit });
+        if (!cls.endsWith('vac') || hecho) td.addEventListener('click', () => { S.fecha = d; S.vista = 'dia'; cargar(); });
+        return td;
+      });
+      tb.append(el('tr', null, el('td', { class: 'prod', text: r.nombre + (r.unidad ? ' (' + un(r.unidad) + ')' : '') }), celdas, el('td', { class: 'tot', text: nd ? `${num(tot)} · ${nd} d` : '' })));
+    });
+    main.append(el('div', { class: 'gridwrap' }, el('table', { class: 'grid' }, thead, tb)));
+  }
+
   function renderDigitar() {
     main.append(el('p', { class: 'sub', text: 'Armados que cocina ya hizo y que todavía no están en Restô. Digítalos en Restô y marca cada uno. Los más antiguos primero.' }));
     if (!S.admin) { main.append(el('div', { class: 'notice', text: 'Esta lista es para administración (la cajera). Entra con el usuario de administración para marcar lo digitado.' })); }
@@ -183,17 +246,22 @@ details.extra select { font: inherit; padding: 8px; border-radius: 8px; border: 
   }
 
   function render() {
-    $('#dianom').textContent = fmt(S.fecha) + (S.fecha === hoyISO() ? ' · hoy' : '');
+    if (S.vista === 'semana') { const a = lunes(S.fecha), b = shift(a, 6), fa = new Date(a + 'T12:00:00'), fb = new Date(b + 'T12:00:00'); $('#dianom').textContent = `Semana ${fa.getDate()}/${fa.getMonth() + 1} – ${fb.getDate()}/${fb.getMonth() + 1}`; }
+    else $('#dianom').textContent = fmt(S.fecha) + (S.fecha === hoyISO() ? ' · hoy' : '');
+    $('#vdia').setAttribute('aria-pressed', String(S.vista === 'dia')); $('#vsem').setAttribute('aria-pressed', String(S.vista === 'semana'));
     const tabs = $('#tabs'); tabs.replaceChildren();
     ['todas', 'bolleria', 'panaderia', 'cocina', 'barra'].forEach(t => tabs.append(el('button', { 'aria-pressed': String(S.tab === t), text: EST[t], onclick: () => { S.tab = t; render(); } })));
     tabs.append(el('button', { 'aria-pressed': String(S.tab === 'digitar'), onclick: () => { S.tab = 'digitar'; render(); } }, 'Para digitar en Restô', S.pend.length ? el('span', { class: 'cnt', text: String(S.pend.length) }) : null));
     main.replaceChildren();
     if (S.err) { main.append(el('div', { class: 'notice', text: 'No se pudo leer la producción: ' + S.err + '. Recarga la página.' })); return; }
-    if (S.tab === 'digitar') renderDigitar(); else renderEstacion();
+    if (S.tab === 'digitar') renderDigitar(); else if (S.vista === 'semana') renderSemana(); else renderEstacion();
   }
 
-  $('#ayer').onclick = () => { S.fecha = shift(S.fecha, -1); cargar(); };
-  $('#manana').onclick = () => { S.fecha = shift(S.fecha, 1); cargar(); };
+  const paso = () => S.vista === 'semana' ? 7 : 1;
+  $('#ayer').onclick = () => { S.fecha = shift(S.fecha, -paso()); cargar(); };
+  $('#manana').onclick = () => { S.fecha = shift(S.fecha, paso()); cargar(); };
+  $('#vdia').onclick = () => { S.vista = 'dia'; cargar(); };
+  $('#vsem').onclick = () => { S.vista = 'semana'; if (S.tab === 'digitar') S.tab = 'todas'; cargar(); };
   $('#hoy').onclick = () => { S.fecha = hoyISO(); cargar(); };
   (async () => { S.db = await acceso.cliente(); S.admin = await acceso.esAdmin(); await cargar(); setInterval(() => { if (!document.hidden && !document.querySelector('input:focus')) cargar(); }, 60000); })();
 })();
