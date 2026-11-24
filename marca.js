@@ -20,6 +20,7 @@ window.MARCA = {
   secciones: [
     { id: 'estaciones', titulo: 'Checklist por estación', corto: 'Estaciones', ruta: 'estaciones/', icono: 'lista', desc: 'Qué debe haber en cada estación antes de abrir' },
     { id: 'produccion', titulo: 'Producción', corto: 'Producción', ruta: 'produccion/', icono: 'libro', desc: 'Plan de armados del día, lo hecho por cocina y lo digitado en Restô' },
+    { id: 'fichas',     titulo: 'Fichas',     corto: 'Fichas',     ruta: 'fichas/',     icono: 'libro', desc: 'Fichas técnicas con cantidades por escala (cambia la cantidad y se recalcula)' },
     { id: 'compras',    titulo: 'Compras',    corto: 'Compras',    ruta: 'estaciones/#pedidos', icono: 'carrito', desc: 'Pedidos a proveedores por familia, con cantidad sugerida' },
     { id: 'ventas',     titulo: 'Ventas',     corto: 'Ventas',     ruta: 'ventas/',     icono: 'grafico', desc: 'Ventas, compras y márgenes', admin: true },
     { id: 'recepcion',  titulo: 'Recepción',  corto: 'Recepción',  ruta: 'recepcion/',  icono: 'caja', desc: 'Facturas, guías y cierres de caja por foto', admin: true }

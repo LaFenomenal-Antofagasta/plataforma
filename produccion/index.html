@@ -41,6 +41,8 @@ main { max-width: 900px; margin: 0 auto; padding: 14px 16px 90px; }
 .row .top { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; }
 .row .nom { font-weight: 600; }
 .row .plan { color: var(--muted); font-size: .9rem; }
+.row a.fl { color: var(--navy); font-size: .9rem; font-weight: 600; text-decoration: none; white-space: nowrap; }
+a.fichas-btn { display: inline-flex; align-items: center; min-height: 44px; margin: 2px 0 12px; padding: 0 16px; border: 1px solid var(--navy); border-radius: 999px; font-size: .9rem; color: var(--navy); text-decoration: none; }
 .row .ctl { display: flex; gap: 8px; align-items: center; margin-top: 8px; flex-wrap: wrap; }
 .row input[type=number], .row input[type=text] { font: inherit; padding: 8px 10px; border: 1px solid var(--rule); border-radius: 8px; background: var(--panel); color: var(--ink); min-height: 44px; width: 110px; }
 .row input[type=text] { width: 150px; }
@@ -131,6 +133,7 @@ table.grid td.tot { color: var(--muted); font-size: .85rem; }
         S.db.from('produccion_dia').select('*').eq('fecha', S.fecha),
         S.db.from('produccion_dia').select('*').not('hecho_cant', 'is', null).eq('digitado', false).order('fecha').order('nombre')]);
       for (const r of [p, d, pe]) if (r.error) throw r.error;
+      if (!S.mapa) { try { S.mapa = JSON.parse(await acceso.archivo('fichas/mapa.json')); } catch (e) { S.mapa = {}; } }  // PRO -> ficha técnica
       S.plan = p.data; S.dia = {}; d.data.forEach(r => S.dia[r.cod] = r); S.pend = pe.data; S.err = null;
       if (!S.planAll) {  // el plan completo (todos los días), paginado: Supabase corta en 1.000 filas por consulta
         let all = [], desde = 0;
@@ -171,8 +174,12 @@ table.grid td.tot { color: var(--muted); font-size: .85rem; }
     const ctl = el('div', { class: 'ctl' }, inp, el('span', { class: 'plan', text: un(r.unidad) }),
       el('button', { class: 'p', text: hecho ? 'Corregir' : 'Hecho', onclick: () => marcarHecho(r, inp.value) }),
       hecho ? el('button', { class: 's', text: 'Deshacer', onclick: () => marcarHecho(r, null) }) : null);
+    const fi = (S.mapa || {})[r.cod], q = r.cantidad != null ? Number(r.cantidad) : 0;   // enlace a la ficha, con la cantidad del plan si la unidad calza
+    const okU = fi && q > 0 && ((fi.u === 'kg' && r.unidad === 'kg') || (fi.u === 'un' && (r.unidad === 'und' || r.unidad === 'un')));
+    const flink = fi ? el('a', { class: 'fl', href: '../fichas/?' + (okU ? 'c=' + (Math.round(q * 100) / 100) + '&' : '') + 'de=produccion#' + encodeURIComponent(fi.c), text: 'Ver ficha ›' }) : null;
     return el('div', { class: 'row' + (hecho ? (h.digitado ? ' dig' : ' hecho') : '') },
       el('div', { class: 'top' }, el('span', { class: 'nom', text: r.nombre }), estadoChip(h)),
+      flink,
       el('div', { class: 'plan', text: r.cantidad != null ? `Plan: ${num(r.cantidad)} ${un(r.unidad)}${r.frecuencia && r.frecuencia !== 'diario' ? ' · ' + r.frecuencia : ''}` : 'Fuera del plan' }),
       ctl,
       hecho ? el('div', { class: 'meta', text: `Armado: ${num(h.hecho_cant)} ${un(h.unidad || r.unidad)} · ${h.hecho_por || ''} ${hora(h.hecho_en)}${h.digitado ? ` · Digitado por ${h.digitado_por || ''} ${hora(h.digitado_en)}${h.nro_resto ? ' (Restô ' + h.nro_resto + ')' : ''}` : ''}` }) : null);
@@ -189,7 +196,8 @@ table.grid td.tot { color: var(--muted); font-size: .85rem; }
     main.append(el('div', { class: 'quien' }, el('label', { for: 'nm', text: 'Tu nombre: ' }), (() => { const i = el('input', { id: 'nm', type: 'text', value: getNombre(), placeholder: 'Escribe tu nombre', autocomplete: 'given-name' }); i.addEventListener('change', () => setNombre(i.value.trim())); return i; })()));
     main.append(el('div', { class: 'barra' }, el('span', { text: `Armados: ${hechas.length} de ${todas.length}` }), el('span', { text: `Digitados en Restô: ${dig.length}` })));
     if (!todas.length) { main.append(el('div', { class: 'notice', text: 'No hay producción programada para este día en esta estación.' })); }
-    else todas.forEach(r => main.append(fila(r)));
+    if (S.tab !== 'todas' && S.tab !== 'digitar' && EST[S.tab]) main.append(el('a', { class: 'fichas-btn', href: '../fichas/?de=produccion&g=' + encodeURIComponent(EST[S.tab]), text: 'Fichas de ' + EST[S.tab] }));
+    todas.forEach(r => main.append(fila(r)));
     const sel = el('select', { 'aria-label': 'Producto armado fuera del plan' }, el('option', { value: '', text: 'Elige el producto…' }), S.extra.filter(r => S.tab === 'todas' || r.estacion === S.tab).map(r => el('option', { value: r.cod, text: r.nombre })));
     const q = el('input', { type: 'number', inputmode: 'decimal', min: '0', step: 'any', placeholder: 'Cantidad', 'aria-label': 'Cantidad' });
     main.append(el('details', { class: 'extra' }, el('summary', { text: 'Armé algo que no está en el plan' }),

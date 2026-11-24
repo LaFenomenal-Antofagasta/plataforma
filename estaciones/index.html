@@ -317,7 +317,7 @@ td small.prov { display: block; color: var(--muted); font-size: .74rem; margin-t
   function renderEst(est, d) {
     const head = el('section', { class: 'group' },
       el('h2', { text: EST[est] }), el('p', { class: 'sub', text: `Stock que debe quedar listo en la estación para el ${fmtF(S.fecha)}. Marca cada línea cuando lo tengas.` }),
-      null);
+      est === 'barra' ? null : el('a', { class: 'fichas-btn', href: '../fichas/?g=' + encodeURIComponent(EST[est]), text: 'Fichas de ' + EST[est] }));
     main.append(head);
     if (lunes(d)) return;
     const rows = stationRows(est, d);
